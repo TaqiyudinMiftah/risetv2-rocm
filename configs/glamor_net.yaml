@@ -1,0 +1,31 @@
+method: glamor_net
+seed: 42
+
+dataset:
+  dataset_root: /home/taqiyudinmiftah/risetv2/caer_dataset/CAER-S
+  image_extensions: [".png", ".jpg", ".jpeg", ".bmp", ".webp"]
+  create_val_split: true
+  val_ratio: 0.1
+  image_size: 224
+
+model:
+  backbone: resnet18
+  pretrained: true
+  dropout: 0.5
+  gla_hidden_dim: 128
+  fusion_hidden_dim: 128
+  classifier_hidden_dim: 128
+
+train:
+  batch_size: 32
+  num_epochs: 30
+  lr: 0.001
+  weight_decay: 0.0001
+  num_workers: 4
+  device: ""  # auto-detect: cuda / rocm / mps / cpu
+  stream_mode: multimodal
+  save_dir: checkpoints
+
+outputs:
+  manifest_path: artifacts/caers/manifest_caers.jsonl
+  diagnostics_path: artifacts/caers/diagnostics_caers.json

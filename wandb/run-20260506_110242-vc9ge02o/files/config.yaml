@@ -1,0 +1,96 @@
+_wandb:
+    value:
+        cli_version: 0.26.1
+        e:
+            4tgtg9dk0cphifd1ocf8gan3c3a4xch6:
+                args:
+                    - --config
+                    - configs/glamor_net.yaml
+                    - --wandb-project
+                    - caers-emotion-recognition
+                codePath: scripts/train.py
+                codePathLocal: scripts/train.py
+                cpu_count: 8
+                cpu_count_logical: 16
+                disk:
+                    /:
+                        total: "256891535360"
+                        used: "132610617344"
+                email: taqiyudinmiftah.02@gmail.com
+                executable: /home/taqiyudinmiftah/risetv2/.venv/bin/python3
+                git:
+                    commit: d5170b151fe912884a64a817d719a81b18bf818a
+                    remote: https://github.com/TaqiyudinMiftah/risetv2.git
+                gpu: AMD Radeon Graphics
+                gpu_amd:
+                    - id: "1"
+                      model: "0x15bf"
+                      performanceLevel: auto
+                      sclkRange: 800Mhz - 2900Mhz
+                      series: AMD Radeon Graphics
+                      sku: PHXGENERIC
+                      uniqueId: "0x0"
+                      vbiosVersion: 113-PHXGENERIC-001
+                      vendor: Advanced Micro Devices, Inc. [AMD/ATI]
+                    - id: "0"
+                      maxPower: "100.0"
+                      model: "0x73ff"
+                      performanceLevel: auto
+                      series: AMD Radeon RX 6600 LE
+                      sku: D53402
+                      uniqueId: "0x0"
+                      vbiosVersion: 113-D53402-L102
+                      vendor: Advanced Micro Devices, Inc. [AMD/ATI]
+                gpu_count: 2
+                host: labkc2-ThinkCentre-M75t-Gen-5
+                memory:
+                    total: "64937807872"
+                os: Linux-6.8.0-107-generic-x86_64-with-glibc2.35
+                program: /home/taqiyudinmiftah/risetv2/scripts/train.py
+                python: CPython 3.12.13
+                root: /home/taqiyudinmiftah/risetv2
+                startedAt: "2026-05-06T04:02:42.634657Z"
+                writerId: 4tgtg9dk0cphifd1ocf8gan3c3a4xch6
+        m: []
+        python_version: 3.12.13
+        t:
+            "1":
+                - 1
+                - 41
+                - 51
+            "2":
+                - 1
+                - 41
+                - 51
+            "3":
+                - 1
+                - 13
+                - 16
+            "4": 3.12.13
+            "5": 0.26.1
+            "12": 0.26.1
+            "13": linux-x86_64
+backbone:
+    value: resnet18
+batch_size:
+    value: 32
+dropout:
+    value: 0.5
+image_size:
+    value: 224
+lr:
+    value: 0.001
+method:
+    value: glamor_net
+num_epochs:
+    value: 30
+pretrained:
+    value: true
+seed:
+    value: 42
+stream_mode:
+    value: multimodal
+val_ratio:
+    value: 0.1
+weight_decay:
+    value: 0.0001

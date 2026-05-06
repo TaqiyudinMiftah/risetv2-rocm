@@ -1,0 +1,91 @@
+_wandb:
+    value:
+        cli_version: 0.26.1
+        e:
+            umgszh2m30i5eswcs0e50i2z131a842w:
+                args:
+                    - --config
+                    - configs/glamor_net.yaml
+                    - --wandb-project
+                    - caers-emotion-recognition
+                codePath: scripts/train.py
+                codePathLocal: scripts/train.py
+                cpu_count: 6
+                cpu_count_logical: 12
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "249792131072"
+                        used: "54020091904"
+                email: taqiyudinmiftah.02@gmail.com
+                executable: /home/agung/riset/risetv2/.venv/bin/python
+                git:
+                    commit: 82fac0c12367f9bcbe9bc6887cf6394290174c9e
+                    remote: https://github.com/TaqiyudinMiftah/risetv2.git
+                gpu: NVIDIA GeForce RTX 3060
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 3584
+                      memoryTotal: "12884901888"
+                      name: NVIDIA GeForce RTX 3060
+                      uuid: GPU-02f7f331-0004-00ff-672a-b69262517bae
+                    - architecture: Ampere
+                      cudaCores: 3584
+                      memoryTotal: "12884901888"
+                      name: NVIDIA GeForce RTX 3060
+                      uuid: GPU-7990a10f-1f72-2507-147a-2f4a121af0fc
+                host: labkc-comm2
+                memory:
+                    total: "33521565696"
+                os: Linux-6.8.0-110-generic-x86_64-with-glibc2.39
+                program: /home/agung/riset/risetv2/scripts/train.py
+                python: CPython 3.12.3
+                root: /home/agung/riset/risetv2
+                startedAt: "2026-05-05T01:35:40.849102Z"
+                writerId: umgszh2m30i5eswcs0e50i2z131a842w
+        m: []
+        python_version: 3.12.3
+        t:
+            "1":
+                - 1
+                - 41
+                - 51
+            "2":
+                - 1
+                - 41
+                - 51
+            "3":
+                - 1
+                - 13
+                - 16
+            "4": 3.12.3
+            "5": 0.26.1
+            "8":
+                - 2
+            "12": 0.26.1
+            "13": linux-x86_64
+backbone:
+    value: resnet18
+batch_size:
+    value: 32
+dropout:
+    value: 0.5
+image_size:
+    value: 224
+lr:
+    value: 0.001
+method:
+    value: glamor_net
+num_epochs:
+    value: 30
+pretrained:
+    value: true
+seed:
+    value: 42
+stream_mode:
+    value: multimodal
+val_ratio:
+    value: 0.1
+weight_decay:
+    value: 0.0001

@@ -1,0 +1,60 @@
+{
+  "os":  "Linux-6.8.0-107-generic-x86_64-with-glibc2.35",
+  "python":  "CPython 3.12.13",
+  "startedAt":  "2026-05-06T01:38:05.055933Z",
+  "args":  [
+    "--config",
+    "configs/glamor_net.yaml",
+    "--wandb-project",
+    "caers-emotion-recognition"
+  ],
+  "program":  "/home/taqiyudinmiftah/risetv2/scripts/train.py",
+  "codePath":  "scripts/train.py",
+  "codePathLocal":  "scripts/train.py",
+  "git":  {
+    "remote":  "https://github.com/TaqiyudinMiftah/risetv2.git",
+    "commit":  "d5170b151fe912884a64a817d719a81b18bf818a"
+  },
+  "email":  "taqiyudinmiftah.02@gmail.com",
+  "root":  "/home/taqiyudinmiftah/risetv2",
+  "host":  "labkc2-ThinkCentre-M75t-Gen-5",
+  "executable":  "/home/taqiyudinmiftah/risetv2/.venv/bin/python3",
+  "cpu_count":  8,
+  "cpu_count_logical":  16,
+  "gpu":  "AMD Radeon RX 6600 LE",
+  "gpu_count":  2,
+  "disk":  {
+    "/":  {
+      "total":  "256891535360",
+      "used":  "97169330176"
+    }
+  },
+  "memory":  {
+    "total":  "64937807872"
+  },
+  "gpu_amd":  [
+    {
+      "id":  "0",
+      "uniqueId":  "0x0",
+      "vbiosVersion":  "113-D53402-L102",
+      "performanceLevel":  "auto",
+      "maxPower":  "100.0",
+      "series":  "AMD Radeon RX 6600 LE",
+      "model":  "0x73ff",
+      "vendor":  "Advanced Micro Devices, Inc. [AMD/ATI]",
+      "sku":  "D53402"
+    },
+    {
+      "id":  "1",
+      "uniqueId":  "0x0",
+      "vbiosVersion":  "113-PHXGENERIC-001",
+      "performanceLevel":  "auto",
+      "series":  "AMD Radeon Graphics",
+      "model":  "0x15bf",
+      "vendor":  "Advanced Micro Devices, Inc. [AMD/ATI]",
+      "sku":  "PHXGENERIC",
+      "sclkRange":  "800Mhz - 2900Mhz"
+    }
+  ],
+  "writerId":  "dp7ssfit6irbvtd0u0pz63g62yzjeyxq"
+}

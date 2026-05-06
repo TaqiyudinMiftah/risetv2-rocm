@@ -1,0 +1,53 @@
+[project]
+name = "caers-pipeline"
+version = "0.1.0"
+description = "CAER-S Context-Aware Emotion Recognition Pipeline"
+readme = "README.md"
+requires-python = ">=3.12"
+
+# NOTE: torch & torchvision di-install manual via setup_uv.sh
+# karena uv resolver belum stabil dengan ROCm PyTorch + triton-rocm.
+# Ref: https://github.com/astral-sh/uv/issues/10712
+dependencies = [
+    "PyYAML>=6.0.0",
+    "Pillow>=10.0.0",
+    "tqdm>=4.66.0",
+    "wandb>=0.16.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "gdown>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "pyright>=1.1.350",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+
+[tool.pyright]
+include = ["src", "scripts"]
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
+strict = ["src/caers_pipeline"]

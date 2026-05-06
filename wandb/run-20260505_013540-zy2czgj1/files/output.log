@@ -1,0 +1,20 @@
+Epoch 1/30
+Traceback (most recent call last):                                                                         
+  train loss=1.9399 acc1=16.66%
+  val   loss=1.9334 acc1=18.65%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 2/30
+  File "/home/agung/riset/risetv2/scripts/train.py", line 303, in <module>
+    main()
+  File "/home/agung/riset/risetv2/scripts/train.py", line 241, in main
+    train_metrics = train_one_epoch(model, loader_train, optimizer, criterion, device)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/src/engine/trainer.py", line 35, in train_one_epoch
+    tracker.update(loss.item(), out["logits"].detach(), labels)
+  File "/home/agung/riset/risetv2/src/engine/metrics.py", line 43, in update
+    acc1, acc5 = accuracy_topk(logits, labels, topk=(1, 5))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/src/engine/metrics.py", line 24, in accuracy_topk
+    correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

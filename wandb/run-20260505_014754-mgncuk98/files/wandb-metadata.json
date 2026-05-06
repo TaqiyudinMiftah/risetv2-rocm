@@ -1,0 +1,53 @@
+{
+  "os":  "Linux-6.8.0-110-generic-x86_64-with-glibc2.39",
+  "python":  "CPython 3.12.3",
+  "startedAt":  "2026-05-05T01:47:54.415461Z",
+  "args":  [
+    "--config",
+    "configs/zhou_cross_attention.yaml",
+    "--wandb-project",
+    "caers-emotion-recognition"
+  ],
+  "program":  "/home/agung/riset/risetv2/scripts/train.py",
+  "codePath":  "scripts/train.py",
+  "codePathLocal":  "scripts/train.py",
+  "git":  {
+    "remote":  "https://github.com/TaqiyudinMiftah/risetv2.git",
+    "commit":  "82fac0c12367f9bcbe9bc6887cf6394290174c9e"
+  },
+  "email":  "taqiyudinmiftah.02@gmail.com",
+  "root":  "/home/agung/riset/risetv2",
+  "host":  "labkc-comm2",
+  "executable":  "/home/agung/riset/risetv2/.venv/bin/python",
+  "cpu_count":  6,
+  "cpu_count_logical":  12,
+  "gpu":  "NVIDIA GeForce RTX 3060",
+  "gpu_count":  2,
+  "disk":  {
+    "/":  {
+      "total":  "249792131072",
+      "used":  "54019604480"
+    }
+  },
+  "memory":  {
+    "total":  "33521565696"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 3060",
+      "memoryTotal":  "12884901888",
+      "cudaCores":  3584,
+      "architecture":  "Ampere",
+      "uuid":  "GPU-02f7f331-0004-00ff-672a-b69262517bae"
+    },
+    {
+      "name":  "NVIDIA GeForce RTX 3060",
+      "memoryTotal":  "12884901888",
+      "cudaCores":  3584,
+      "architecture":  "Ampere",
+      "uuid":  "GPU-7990a10f-1f72-2507-147a-2f4a121af0fc"
+    }
+  ],
+  "cudaVersion":  "13.0",
+  "writerId":  "n3706ab72ngezf7f3vjda5r96x9hi2zh"
+}

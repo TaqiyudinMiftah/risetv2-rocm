@@ -1,0 +1,10 @@
+# For AMD ROCm, install torch/torchvision from the ROCm wheel index instead:
+#   uv pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm6.2
+#
+# PyTorch for ROCm reuses the torch.cuda.* API for HIP compatibility, so no code changes are needed.
+
+PyYAML>=6.0.0
+Pillow>=10.0.0
+tqdm>=4.66.0
+wandb>=0.16.0
+numpy>=1.24.0

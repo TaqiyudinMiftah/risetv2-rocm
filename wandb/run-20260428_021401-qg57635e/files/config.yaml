@@ -1,0 +1,96 @@
+_wandb:
+    value:
+        cli_version: 0.26.1
+        e:
+            z6lvr2j6wducdcqa2xiljbtwizcuz85v:
+                args:
+                    - --config
+                    - /home/agung/riset/risetv2/configs/caers_data.yaml
+                    - --wandb-api-key
+                    - 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
+                    - --wandb-project
+                    - caers-emotion-recognition
+                    - --wandb-entity
+                    - Tim-1
+                    - --wandb-run-name
+                    - CAER-Dual Stream-20260428-021347
+                codePath: risetv2/scripts/train_caers.py
+                codePathLocal: scripts/train_caers.py
+                cpu_count: 6
+                cpu_count_logical: 12
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "249792131072"
+                        used: "54001020928"
+                email: taqiyudinmiftah.02@gmail.com
+                executable: /home/agung/riset/risetv2/.venv/bin/python
+                git:
+                    commit: 0b7ebfcb11d91732a7948d802b6a51809b8a34b3
+                    remote: https://github.com/TaqiyudinMiftah/riset.git
+                gpu: NVIDIA GeForce RTX 3060
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 3584
+                      memoryTotal: "12884901888"
+                      name: NVIDIA GeForce RTX 3060
+                      uuid: GPU-02f7f331-0004-00ff-672a-b69262517bae
+                    - architecture: Ampere
+                      cudaCores: 3584
+                      memoryTotal: "12884901888"
+                      name: NVIDIA GeForce RTX 3060
+                      uuid: GPU-7990a10f-1f72-2507-147a-2f4a121af0fc
+                host: labkc-comm2
+                memory:
+                    total: "33521553408"
+                os: Linux-6.8.0-110-generic-x86_64-with-glibc2.39
+                program: /home/agung/riset/risetv2/scripts/train_caers.py
+                python: CPython 3.12.3
+                root: /home/agung/riset/risetv2
+                startedAt: "2026-04-28T02:14:01.318647Z"
+                writerId: z6lvr2j6wducdcqa2xiljbtwizcuz85v
+        m: []
+        python_version: 3.12.3
+        t:
+            "1":
+                - 1
+                - 41
+            "2":
+                - 1
+                - 41
+            "3":
+                - 1
+                - 2
+                - 3
+                - 13
+                - 16
+                - 62
+            "4": 3.12.3
+            "5": 0.26.1
+            "8":
+                - 2
+            "12": 0.26.1
+            "13": linux-x86_64
+backbone:
+    value: resnet18
+batch_size:
+    value: 32
+dropout:
+    value: 0.5
+image_size:
+    value: 224
+lr:
+    value: 0.001
+num_epochs:
+    value: 30
+pretrained:
+    value: true
+seed:
+    value: 42
+stream_mode:
+    value: multimodal
+val_ratio:
+    value: 0.1
+weight_decay:
+    value: 0.0001

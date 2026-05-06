@@ -1,0 +1,22 @@
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_setup.py:_flush():81] Current SDK version is 0.26.1
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_setup.py:_flush():81] Configure stats pid to 27495
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_init.py:setup_run_log_directory():723] Logging user logs to /home/agung/riset/risetv2/wandb/run-20260505_013822-vq2ayav8/logs/debug.log
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_init.py:setup_run_log_directory():724] Logging internal logs to /home/agung/riset/risetv2/wandb/run-20260505_013822-vq2ayav8/logs/debug-internal.log
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_init.py:init():850] calling init triggers
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_init.py:init():855] wandb.init called with sweep_config: {}
+config: {'method': 'zhou_cross_attention', 'seed': 42, 'backbone': 'resnet18', 'pretrained': True, 'dropout': 0.5, 'batch_size': 32, 'num_epochs': 30, 'lr': 0.001, 'weight_decay': 0.0001, 'stream_mode': 'multimodal', 'image_size': 224, 'val_ratio': 0.1, '_wandb': {}}
+2026-05-05 01:38:22,767 INFO    MainThread:27495 [wandb_init.py:init():898] starting backend
+2026-05-05 01:38:22,986 INFO    MainThread:27495 [wandb_init.py:init():913] sending inform_init request
+2026-05-05 01:38:23,394 INFO    MainThread:27495 [wandb_init.py:init():918] backend started and connected
+2026-05-05 01:38:23,395 INFO    MainThread:27495 [wandb_init.py:init():988] updated telemetry
+2026-05-05 01:38:23,399 INFO    MainThread:27495 [wandb_init.py:init():1011] communicating run to backend with 90.0 second timeout
+2026-05-05 01:38:23,895 INFO    MainThread:27495 [wandb_init.py:init():1056] starting run threads in backend
+2026-05-05 01:38:23,956 INFO    MainThread:27495 [wandb_run.py:_console_start():2554] atexit reg
+2026-05-05 01:38:23,956 INFO    MainThread:27495 [wandb_run.py:_redirect():2403] redirect: wrap_raw
+2026-05-05 01:38:23,956 INFO    MainThread:27495 [wandb_run.py:_redirect():2472] Wrapping output streams.
+2026-05-05 01:38:23,956 INFO    MainThread:27495 [wandb_run.py:_redirect():2495] Redirects installed.
+2026-05-05 01:38:23,958 INFO    MainThread:27495 [wandb_init.py:init():1094] run started, returning control to user process
+2026-05-05 01:38:24,724 INFO    MainThread:27495 [wandb_watch.py:_watch():69] Watching
+2026-05-05 01:38:43,804 INFO    wandb-AsyncioManager-main:27495 [service_client.py:_forward_responses():134] Reached EOF.
+2026-05-05 01:38:43,804 INFO    wandb-AsyncioManager-main:27495 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,24 @@
+Epoch 1/30
+train:   0%|                                                                                                                                   | 0/1379 [00:00<?, ?it/s]/home/taqiyudinmiftah/risetv2/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py:125: UserWarning: Attempting to use hipBLASLt on an unsupported architecture! Overriding blas backend to hipblas (Triggered internally at ../aten/src/ATen/Context.cpp:296.)
+  return F.linear(input, self.weight, self.bias)
+train:  21%|████████████████████▏                                                                          | 293/1379 [00:56<03:10,  5.71it/s, loss=1.4467, acc1=42.15%]
+  train loss=1.9436 acc1=16.49%
+  val   loss=1.9235 acc1=18.29%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 2/30
+  train loss=1.9145 acc1=19.98%
+  val   loss=1.8974 acc1=21.41%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 3/30
+  train loss=1.8742 acc1=23.11%
+  val   loss=1.8361 acc1=25.80%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 4/30
+  train loss=1.7878 acc1=27.79%
+  val   loss=1.6744 acc1=32.96%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 5/30
+  train loss=1.6106 acc1=35.85%
+  val   loss=1.5343 acc1=38.69%
+  Saved best model -> checkpoints/glamor_net/best_model.pt
+Epoch 6/30

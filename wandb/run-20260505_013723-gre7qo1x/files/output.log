@@ -1,0 +1,42 @@
+Building confounder dictionary from training data...
+Building confounder dictionary from training data...
+Traceback (most recent call last):                                                                         
+Clustering 44107 context features into 1024 confounders...
+  File "/home/agung/riset/risetv2/scripts/train.py", line 303, in <module>
+    main()
+  File "/home/agung/riset/risetv2/scripts/train.py", line 202, in main
+    conf_dict, conf_prior = build_confounder_for_dataset(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/src/models/yang_ccim/confounder_builder.py", line 102, in build_confounder_for_dataset
+    confounder_dict, confounder_prior = build_confounder_dict(
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/src/models/yang_ccim/confounder_builder.py", line 54, in build_confounder_dict
+    labels = kmeans.fit_predict(features_np)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/cluster/_kmeans.py", line 1070, in fit_predict
+    return self.fit(X, sample_weight=sample_weight).labels_
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/base.py", line 1336, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/cluster/_kmeans.py", line 1505, in fit
+    centers_init = self._init_centroids(
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/cluster/_kmeans.py", line 1020, in _init_centroids
+    centers, _ = _kmeans_plusplus(
+                 ^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/cluster/_kmeans.py", line 257, in _kmeans_plusplus
+    distance_to_candidates = _euclidean_distances(
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/metrics/pairwise.py", line 404, in _euclidean_distances
+    distances = _euclidean_distances_upcast(X, XX, Y, YY)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/metrics/pairwise.py", line 630, in _euclidean_distances_upcast
+    d = -2 * safe_sparse_dot(X_chunk, Y_chunk.T, dense_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/sklearn/utils/extmath.py", line 230, in safe_sparse_dot
+    sparse.issparse(a)
+  File "/home/agung/riset/risetv2/.venv/lib/python3.12/site-packages/scipy/_lib/_sparse.py", line 10, in issparse
+    def issparse(x):
+
+KeyboardInterrupt

@@ -1,0 +1,25 @@
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_setup.py:_flush():81] Current SDK version is 0.26.1
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_setup.py:_flush():81] Configure stats pid to 150572
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_init.py:setup_run_log_directory():723] Logging user logs to /home/agung/riset/risetv2/wandb/run-20260428_021401-qg57635e/logs/debug.log
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_init.py:setup_run_log_directory():724] Logging internal logs to /home/agung/riset/risetv2/wandb/run-20260428_021401-qg57635e/logs/debug-internal.log
+2026-04-28 02:14:01,319 INFO    MainThread:150572 [wandb_init.py:init():850] calling init triggers
+2026-04-28 02:14:01,320 INFO    MainThread:150572 [wandb_init.py:init():855] wandb.init called with sweep_config: {}
+config: {'seed': 42, 'backbone': 'resnet18', 'pretrained': True, 'dropout': 0.5, 'batch_size': 32, 'num_epochs': 30, 'lr': 0.001, 'weight_decay': 0.0001, 'stream_mode': 'multimodal', 'image_size': 224, 'val_ratio': 0.1, '_wandb': {}}
+2026-04-28 02:14:01,320 INFO    MainThread:150572 [wandb_init.py:init():898] starting backend
+2026-04-28 02:14:02,394 INFO    MainThread:150572 [wandb_init.py:init():913] sending inform_init request
+2026-04-28 02:14:03,079 INFO    MainThread:150572 [wandb_init.py:init():918] backend started and connected
+2026-04-28 02:14:03,080 INFO    MainThread:150572 [wandb_init.py:init():988] updated telemetry
+2026-04-28 02:14:03,084 INFO    MainThread:150572 [wandb_init.py:init():1011] communicating run to backend with 90.0 second timeout
+2026-04-28 02:14:03,978 INFO    MainThread:150572 [wandb_init.py:init():1056] starting run threads in backend
+2026-04-28 02:14:04,940 INFO    MainThread:150572 [wandb_run.py:_console_start():2554] atexit reg
+2026-04-28 02:14:04,940 INFO    MainThread:150572 [wandb_run.py:_redirect():2403] redirect: wrap_raw
+2026-04-28 02:14:04,940 INFO    MainThread:150572 [wandb_run.py:_redirect():2472] Wrapping output streams.
+2026-04-28 02:14:04,940 INFO    MainThread:150572 [wandb_run.py:_redirect():2495] Redirects installed.
+2026-04-28 02:14:04,942 INFO    MainThread:150572 [wandb_init.py:init():1094] run started, returning control to user process
+2026-04-28 02:14:06,557 INFO    MainThread:150572 [wandb_watch.py:_watch():69] Watching
+2026-04-28 03:52:18,621 INFO    MainThread:150572 [wandb_run.py:_finish():2321] finishing run Tim-1/caers-emotion-recognition/qg57635e
+2026-04-28 03:52:18,656 INFO    MainThread:150572 [wandb_run.py:_atexit_cleanup():2520] got exitcode: 0
+2026-04-28 03:52:18,656 INFO    MainThread:150572 [wandb_run.py:_restore():2502] restore
+2026-04-28 03:52:18,656 INFO    MainThread:150572 [wandb_run.py:_restore():2508] restore done
+2026-04-28 03:52:22,676 INFO    MainThread:150572 [wandb_run.py:_footer_sync_info():3889] logging synced files

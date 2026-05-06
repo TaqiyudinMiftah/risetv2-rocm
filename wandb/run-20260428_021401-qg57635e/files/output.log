@@ -1,0 +1,106 @@
+Epoch 1/30
+                                                                                                                                                         
+  train loss=1.9363 acc1=19.36%
+  val   loss=2.0148 acc1=17.90%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 2/30
+  train loss=1.8642 acc1=24.59%
+  val   loss=1.7884 acc1=29.57%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 3/30
+  train loss=1.6907 acc1=34.28%
+  val   loss=1.4917 acc1=42.98%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 4/30
+  train loss=1.2911 acc1=52.25%
+  val   loss=1.1180 acc1=58.78%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 5/30
+  train loss=0.8508 acc1=69.75%
+  val   loss=0.8570 acc1=70.71%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 6/30
+  train loss=0.5698 acc1=80.38%
+  val   loss=0.7588 acc1=75.12%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 7/30
+  train loss=0.4016 acc1=86.31%
+  val   loss=0.7776 acc1=77.45%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 8/30
+  train loss=0.3247 acc1=89.31%
+  val   loss=1.1038 acc1=72.69%
+Epoch 9/30
+  train loss=0.2291 acc1=92.85%
+  val   loss=0.7986 acc1=79.78%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 10/30
+  train loss=0.1510 acc1=95.30%
+  val   loss=0.8638 acc1=80.12%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 11/30
+  train loss=0.1435 acc1=95.58%
+  val   loss=0.8403 acc1=80.73%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 12/30
+  train loss=0.1254 acc1=96.09%
+  val   loss=0.8772 acc1=80.10%
+Epoch 13/30
+  train loss=0.1147 acc1=96.32%
+  val   loss=1.0361 acc1=79.61%
+Epoch 14/30
+  train loss=0.1095 acc1=96.65%
+  val   loss=0.8749 acc1=81.37%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 15/30
+  train loss=0.0941 acc1=96.93%
+  val   loss=0.9734 acc1=80.86%
+Epoch 16/30
+  train loss=0.0905 acc1=97.14%
+  val   loss=0.9998 acc1=80.61%
+Epoch 17/30
+  train loss=0.0867 acc1=97.29%
+  val   loss=0.9965 acc1=80.76%
+Epoch 18/30
+  train loss=0.0792 acc1=97.54%
+  val   loss=0.9714 acc1=80.31%
+Epoch 19/30
+  train loss=0.0775 acc1=97.56%
+  val   loss=0.9963 acc1=81.22%
+Epoch 20/30
+  train loss=0.0714 acc1=97.72%
+  val   loss=1.0085 acc1=80.67%
+Epoch 21/30
+  train loss=0.0684 acc1=97.81%
+  val   loss=1.0339 acc1=81.06%
+Epoch 22/30
+  train loss=0.0683 acc1=97.86%
+  val   loss=0.9728 acc1=81.47%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 23/30
+  train loss=0.0660 acc1=97.97%
+  val   loss=0.9810 acc1=81.41%
+Epoch 24/30
+  train loss=0.0579 acc1=98.14%
+  val   loss=0.9763 acc1=81.57%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 25/30
+  train loss=0.0561 acc1=98.26%
+  val   loss=1.0233 acc1=81.76%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 26/30
+  train loss=0.0592 acc1=98.17%
+  val   loss=1.0503 acc1=80.82%
+Epoch 27/30
+  train loss=0.0583 acc1=98.24%
+  val   loss=1.0881 acc1=80.06%
+Epoch 28/30
+  train loss=0.0460 acc1=98.50%
+  val   loss=1.0989 acc1=81.37%
+Epoch 29/30
+  train loss=0.0480 acc1=98.49%
+  val   loss=1.1076 acc1=80.65%
+Epoch 30/30
+  train loss=0.0483 acc1=98.51%
+  val   loss=1.0868 acc1=80.98%
+Training complete. History saved to checkpoints/caers/history.json

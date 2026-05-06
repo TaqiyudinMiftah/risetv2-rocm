@@ -1,0 +1,18 @@
+{"time":"2026-05-06T08:38:05.317292545+07:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-05-06T08:38:05.317500114+07:00","level":"INFO","msg":"stream: starting","core version":"0.26.1"}
+{"time":"2026-05-06T08:38:05.850182874+07:00","level":"INFO","msg":"stream: created new stream","id":"pwqrockg"}
+{"time":"2026-05-06T08:38:05.850240964+07:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-05-06T08:38:05.850344943+07:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-05-06T08:38:05.850362963+07:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-05-06T08:38:05.850361033+07:00","level":"INFO","msg":"writer: started","stream_id":"pwqrockg"}
+{"time":"2026-05-06T08:38:06.655958432+07:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":1}
+{"time":"2026-05-06T08:38:07.129561137+07:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-06T08:38:21.656779219+07:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":0,"events_lines":2,"console_offset":1,"console_lines":5,"uploaded_len":2}
+{"time":"2026-05-06T08:38:22.12770154+07:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-06T08:38:34.652779623+07:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-05-06T08:38:34.652905813+07:00","level":"INFO","msg":"filestream: sending request","total_files":2,"console_offset":5,"console_lines":19,"uploaded_len":3,"complete":true,"exit_code":255}
+{"time":"2026-05-06T08:38:35.02519951+07:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-05-06T08:38:35.025305649+07:00","level":"INFO","msg":"stream: finishing up"}
+{"time":"2026-05-06T08:38:35.025313239+07:00","level":"INFO","msg":"handler: closed"}
+{"time":"2026-05-06T08:38:35.025367059+07:00","level":"INFO","msg":"sender: closed"}
+{"time":"2026-05-06T08:38:35.025370919+07:00","level":"INFO","msg":"stream: all finished"}

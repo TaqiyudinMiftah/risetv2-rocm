@@ -1,0 +1,28 @@
+Downloading: "https://download.pytorch.org/models/resnet18-f37072fd.pth" to /home/agung/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth
+100%|█████████████████████████████████████████████████████████████████| 44.7M/44.7M [00:00<00:00, 71.3MB/s]
+Epoch 1/30
+train:  62%|████████████████████▉             | 851/1379 [01:48<01:05,  8.10it/s, loss=0.2755, acc1=91.18%]
+  train loss=1.9370 acc1=19.69%
+  val   loss=1.9068 acc1=21.37%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 2/30
+  train loss=1.8581 acc1=24.78%
+  val   loss=1.7719 acc1=30.14%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 3/30
+  train loss=1.6376 acc1=37.06%
+  val   loss=1.5057 acc1=42.88%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 4/30
+  train loss=1.1897 acc1=56.52%
+  val   loss=1.0061 acc1=63.51%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 5/30
+  train loss=0.7660 acc1=73.44%
+  val   loss=0.7904 acc1=73.96%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 6/30
+  train loss=0.4697 acc1=84.44%
+  val   loss=0.7377 acc1=76.51%
+  Saved best model -> checkpoints/caers/best_model.pt
+Epoch 7/30
