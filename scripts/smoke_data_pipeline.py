@@ -13,6 +13,7 @@ if str(SRC_DIR) not in sys.path:
 
 from config.config import load_config
 from datasets.caers_dataset import CAERSTwoStreamDataset
+from utils.logger import setup_logger
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,24 +25,33 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    cfg = load_config(args.config)
 
-    ds_train = CAERSTwoStreamDataset(
-        manifest_path=cfg.outputs.manifest_path,
-        dataset_root=cfg.dataset.dataset_root,
-        split="train",
-        image_size=cfg.dataset.image_size,
-    )
+    logger = setup_logger(name="caers_smoke", log_dir=PROJECT_ROOT / "logs")
+    logger.info("Starting smoke test script")
+    logger.info("Config path: %s", args.config)
 
-    loader = DataLoader(ds_train, batch_size=args.batch_size, shuffle=False, num_workers=0)
-    batch = next(iter(loader))
+    try:
+        cfg = load_config(args.config)
 
-    print("Smoke test success")
-    print(f"Train samples: {len(ds_train)}")
-    print(f"Num classes: {len(ds_train.label_to_index)}")
-    print(f"face_image shape: {tuple(batch['face_image'].shape)}")
-    print(f"context_image shape: {tuple(batch['context_image'].shape)}")
-    print(f"label shape: {tuple(batch['label'].shape)}")
+        ds_train = CAERSTwoStreamDataset(
+            manifest_path=cfg.outputs.manifest_path,
+            dataset_root=cfg.dataset.dataset_root,
+            split="train",
+            image_size=cfg.dataset.image_size,
+        )
+
+        loader = DataLoader(ds_train, batch_size=args.batch_size, shuffle=False, num_workers=0)
+        batch = next(iter(loader))
+
+        logger.info("Smoke test success")
+        logger.info("Train samples: %d", len(ds_train))
+        logger.info("Num classes: %d", len(ds_train.label_to_index))
+        logger.info("face_image shape: %s", tuple(batch["face_image"].shape))
+        logger.info("context_image shape: %s", tuple(batch["context_image"].shape))
+        logger.info("label shape: %s", tuple(batch["label"].shape))
+    except Exception:
+        logger.exception("Smoke test crashed with an exception")
+        raise
 
 
 if __name__ == "__main__":

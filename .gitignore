@@ -11,6 +11,9 @@ outputs/
 *.pt
 *.pth
 
+# Logs
+logs/
+
 # Editor
 .vscode/
 caer_dataset/

@@ -21,6 +21,7 @@ from datasets.transforms import default_transform
 from engine.evaluator import evaluate, evaluate_per_class
 from utils.device_utils import get_device
 from utils.io_utils import write_json
+from utils.logger import setup_logger
 
 
 def build_model(num_classes: int, cfg: object) -> nn.Module:
@@ -108,152 +109,164 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    cfg = load_config(args.config)
 
-    device = get_device(cfg.train.device)
+    logger = setup_logger(name="caers_eval", log_dir=PROJECT_ROOT / "logs")
+    logger.info("Starting evaluation script")
+    logger.info("Config path: %s | Checkpoint: %s | Split: %s", args.config, args.checkpoint, args.split)
 
-    # Login to W&B if API key provided
-    if args.wandb_api_key and not args.wandb_offline:
-        wandb.login(key=args.wandb_api_key)
+    try:
+        cfg = load_config(args.config)
 
-    # Initialize W&B
-    wandb_mode = "offline" if args.wandb_offline else "online"
-    run_name = args.wandb_run_name or f"eval-{cfg.method}-{cfg.model.backbone}"
-    run = wandb.init(
-        project=args.wandb_project,
-        entity=args.wandb_entity or None,
-        name=run_name,
-        mode=wandb_mode,
-        job_type="evaluation",
-        config={
-            "method": cfg.method,
-            "eval_split": args.split,
-            "checkpoint": args.checkpoint,
-            "backbone": cfg.model.backbone,
-            "pretrained": cfg.model.pretrained,
-            "dropout": cfg.model.dropout,
-            "batch_size": cfg.train.batch_size,
-            "stream_mode": cfg.train.stream_mode,
-            "image_size": cfg.dataset.image_size,
-        },
-    )
+        device = get_device(cfg.train.device)
+        logger.info("Using device: %s", device)
 
-    ds_test = CAERSTwoStreamDataset(
-        manifest_path=cfg.outputs.manifest_path,
-        dataset_root=cfg.dataset.dataset_root,
-        split=args.split,
-        image_size=cfg.dataset.image_size,
-        transform=default_transform(cfg.dataset.image_size),
-    )
-    loader_test = DataLoader(
-        ds_test,
-        batch_size=cfg.train.batch_size,
-        shuffle=False,
-        num_workers=cfg.train.num_workers,
-        pin_memory=True,
-    )
+        # Login to W&B if API key provided
+        if args.wandb_api_key and not args.wandb_offline:
+            wandb.login(key=args.wandb_api_key)
 
-    num_classes = len(ds_test.label_to_index)
-    model = build_model(num_classes, cfg).to(device)
-
-    # For Yang CCIM: load confounder dictionary
-    if cfg.method == "yang_ccim":
-        confounder_path = cfg.train.save_dir / "confounder_dict.pt"
-        if confounder_path.exists():
-            print(f"Loading confounder dictionary from {confounder_path}")
-            ckpt_conf = torch.load(confounder_path, map_location="cpu")
-            model.set_confounder_dict(ckpt_conf["confounder_dict"], ckpt_conf["confounder_prior"])
-        else:
-            print("WARNING: Confounder dictionary not found. Building from scratch...")
-            from models.yang_ccim.confounder_builder import build_confounder_for_dataset
-
-            conf_dict, conf_prior = build_confounder_for_dataset(
-                manifest_path=cfg.outputs.manifest_path,
-                dataset_root=cfg.dataset.dataset_root,
-                backbone=cfg.model.backbone,
-                pretrained=cfg.model.pretrained,
-                image_size=cfg.dataset.image_size,
-                num_confounders=cfg.model.num_confounders,
-                batch_size=cfg.train.batch_size,
-                num_workers=cfg.train.num_workers,
-                device=device,
-                seed=cfg.seed,
-            )
-            model.set_confounder_dict(conf_dict, conf_prior)
-
-    checkpoint = torch.load(args.checkpoint, map_location=device)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    label_to_index = checkpoint.get("label_to_index", ds_test.label_to_index)
-    index_to_label = {int(k): v for k, v in checkpoint.get("index_to_label", ds_test.index_to_label).items()}
-
-    criterion = nn.CrossEntropyLoss()
-    metrics = evaluate(model, loader_test, criterion, device)
-    per_class = evaluate_per_class(model, loader_test, device, index_to_label)
-
-    print(f"Results on '{args.split}' ({cfg.method}):")
-    print(f"  Loss: {metrics['loss']:.4f}")
-    print(f"  Top-1 Accuracy: {metrics['acc1']:.2f}%")
-    print(f"  Top-5 Accuracy: {metrics['acc5']:.2f}%")
-    print("  Per-class Accuracy:")
-    for label_name, acc in per_class["per_class_acc"].items():
-        print(f"    {label_name}: {acc:.2f}%")
-
-    # Log metrics to W&B
-    wandb.log({
-        f"{args.split}/loss": metrics["loss"],
-        f"{args.split}/acc1": metrics["acc1"],
-        f"{args.split}/acc5": metrics["acc5"],
-        f"{args.split}/overall_acc": per_class["overall_acc"],
-    })
-
-    # Log per-class accuracy as a table
-    class_data = []
-    for label_name, acc in per_class["per_class_acc"].items():
-        class_data.append([label_name, acc])
-
-    class_table = wandb.Table(columns=["class", "accuracy"], data=class_data)
-    wandb.log({f"{args.split}/per_class_accuracy": class_table})
-
-    # Log per-class accuracy as bar chart
-    wandb.log({
-        f"{args.split}/per_class_acc_bar": wandb.plot.bar(
-            class_table, "class", "accuracy", title=f"Per-Class Accuracy ({args.split})"
+        # Initialize W&B
+        wandb_mode = "offline" if args.wandb_offline else "online"
+        run_name = args.wandb_run_name or f"eval-{cfg.method}-{cfg.model.backbone}"
+        run = wandb.init(
+            project=args.wandb_project,
+            entity=args.wandb_entity or None,
+            name=run_name,
+            mode=wandb_mode,
+            job_type="evaluation",
+            config={
+                "method": cfg.method,
+                "eval_split": args.split,
+                "checkpoint": args.checkpoint,
+                "backbone": cfg.model.backbone,
+                "pretrained": cfg.model.pretrained,
+                "dropout": cfg.model.dropout,
+                "batch_size": cfg.train.batch_size,
+                "stream_mode": cfg.train.stream_mode,
+                "image_size": cfg.dataset.image_size,
+            },
         )
-    })
 
-    # Log summary stats
-    wandb.run.summary[f"{args.split}_loss"] = metrics["loss"]
-    wandb.run.summary[f"{args.split}_acc1"] = metrics["acc1"]
-    wandb.run.summary[f"{args.split}_acc5"] = metrics["acc5"]
-    wandb.run.summary[f"{args.split}_overall_acc"] = per_class["overall_acc"]
+        ds_test = CAERSTwoStreamDataset(
+            manifest_path=cfg.outputs.manifest_path,
+            dataset_root=cfg.dataset.dataset_root,
+            split=args.split,
+            image_size=cfg.dataset.image_size,
+            transform=default_transform(cfg.dataset.image_size),
+        )
+        loader_test = DataLoader(
+            ds_test,
+            batch_size=cfg.train.batch_size,
+            shuffle=False,
+            num_workers=cfg.train.num_workers,
+            pin_memory=True,
+        )
 
-    out = {
-        "method": cfg.method,
-        "split": args.split,
-        "metrics": metrics,
-        "per_class_acc": per_class["per_class_acc"],
-        "overall_acc": per_class["overall_acc"],
-    }
-    out_path = cfg.train.save_dir / f"eval_{args.split}.json"
-    write_json(out_path, out)
+        num_classes = len(ds_test.label_to_index)
+        model = build_model(num_classes, cfg).to(device)
+        logger.info("Model built: method=%s backbone=%s classes=%d", cfg.method, cfg.model.backbone, num_classes)
 
-    # Log evaluation JSON as artifact
-    artifact = wandb.Artifact(
-        name=f"{cfg.method}-eval-{wandb.run.id}",
-        type="evaluation",
-        metadata={
+        # For Yang CCIM: load confounder dictionary
+        if cfg.method == "yang_ccim":
+            confounder_path = cfg.train.save_dir / "confounder_dict.pt"
+            if confounder_path.exists():
+                logger.info("Loading confounder dictionary from %s", confounder_path)
+                ckpt_conf = torch.load(confounder_path, map_location="cpu")
+                model.set_confounder_dict(ckpt_conf["confounder_dict"], ckpt_conf["confounder_prior"])
+            else:
+                logger.warning("Confounder dictionary not found. Building from scratch...")
+                from models.yang_ccim.confounder_builder import build_confounder_for_dataset
+
+                conf_dict, conf_prior = build_confounder_for_dataset(
+                    manifest_path=cfg.outputs.manifest_path,
+                    dataset_root=cfg.dataset.dataset_root,
+                    backbone=cfg.model.backbone,
+                    pretrained=cfg.model.pretrained,
+                    image_size=cfg.dataset.image_size,
+                    num_confounders=cfg.model.num_confounders,
+                    batch_size=cfg.train.batch_size,
+                    num_workers=cfg.train.num_workers,
+                    device=device,
+                    seed=cfg.seed,
+                )
+                model.set_confounder_dict(conf_dict, conf_prior)
+                logger.info("Confounder dictionary built")
+
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        label_to_index = checkpoint.get("label_to_index", ds_test.label_to_index)
+        index_to_label = {int(k): v for k, v in checkpoint.get("index_to_label", ds_test.index_to_label).items()}
+        logger.info("Checkpoint loaded: %s", args.checkpoint)
+
+        criterion = nn.CrossEntropyLoss()
+        metrics = evaluate(model, loader_test, criterion, device)
+        per_class = evaluate_per_class(model, loader_test, device, index_to_label)
+
+        logger.info("Results on '%s' (%s):", args.split, cfg.method)
+        logger.info("  Loss: %.4f", metrics["loss"])
+        logger.info("  Top-1 Accuracy: %.2f%%", metrics["acc1"])
+        logger.info("  Top-5 Accuracy: %.2f%%", metrics["acc5"])
+        for label_name, acc in per_class["per_class_acc"].items():
+            logger.info("  %s: %.2f%%", label_name, acc)
+
+        # Log metrics to W&B
+        wandb.log({
+            f"{args.split}/loss": metrics["loss"],
+            f"{args.split}/acc1": metrics["acc1"],
+            f"{args.split}/acc5": metrics["acc5"],
+            f"{args.split}/overall_acc": per_class["overall_acc"],
+        })
+
+        # Log per-class accuracy as a table
+        class_data = []
+        for label_name, acc in per_class["per_class_acc"].items():
+            class_data.append([label_name, acc])
+
+        class_table = wandb.Table(columns=["class", "accuracy"], data=class_data)
+        wandb.log({f"{args.split}/per_class_accuracy": class_table})
+
+        # Log per-class accuracy as bar chart
+        wandb.log({
+            f"{args.split}/per_class_acc_bar": wandb.plot.bar(
+                class_table, "class", "accuracy", title=f"Per-Class Accuracy ({args.split})"
+            )
+        })
+
+        # Log summary stats
+        wandb.run.summary[f"{args.split}_loss"] = metrics["loss"]
+        wandb.run.summary[f"{args.split}_acc1"] = metrics["acc1"]
+        wandb.run.summary[f"{args.split}_acc5"] = metrics["acc5"]
+        wandb.run.summary[f"{args.split}_overall_acc"] = per_class["overall_acc"]
+
+        out = {
             "method": cfg.method,
             "split": args.split,
-            "acc1": metrics["acc1"],
+            "metrics": metrics,
+            "per_class_acc": per_class["per_class_acc"],
             "overall_acc": per_class["overall_acc"],
-        },
-    )
-    artifact.add_file(str(out_path))
-    wandb.log_artifact(artifact)
+        }
+        out_path = cfg.train.save_dir / f"eval_{args.split}.json"
+        write_json(out_path, out)
 
-    print(f"Evaluation saved to {out_path}")
+        # Log evaluation JSON as artifact
+        artifact = wandb.Artifact(
+            name=f"{cfg.method}-eval-{wandb.run.id}",
+            type="evaluation",
+            metadata={
+                "method": cfg.method,
+                "split": args.split,
+                "acc1": metrics["acc1"],
+                "overall_acc": per_class["overall_acc"],
+            },
+        )
+        artifact.add_file(str(out_path))
+        wandb.log_artifact(artifact)
 
-    wandb.finish()
+        logger.info("Evaluation saved to %s", out_path)
+
+        wandb.finish()
+    except Exception:
+        logger.exception("Evaluation crashed with an exception")
+        raise
 
 
 if __name__ == "__main__":

@@ -1,0 +1,66 @@
+2026-05-07 08:34:53 | INFO     | caers_train | Model built: method=glamor_net backbone=resnet18 classes=8
+2026-05-07 08:34:53 | INFO     | caers_train | Epoch 1/30 started
+train:   0%|                                                                                                                    | 0/1379 [00:00<?, ?it/s]/home/taqiyudinmiftah/risetv2/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py:125: UserWarning: Attempting to use hipBLASLt on an unsupported architecture! Overriding blas backend to hipblas (Triggered internally at ../aten/src/ATen/Context.cpp:296.)
+  return F.linear(input, self.weight, self.bias)
+                                                                                                                                                         
+2026-05-07 08:39:04 | INFO     | caers_train | Epoch 1/30 finished | train loss=1.9474 acc1=16.23% | val loss=1.9306 acc1=19.16%
+2026-05-07 08:39:04 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=19.16%)
+2026-05-07 08:39:06 | INFO     | caers_train | Epoch 2/30 started
+2026-05-07 08:43:16 | INFO     | caers_train | Epoch 2/30 finished | train loss=1.9285 acc1=18.64% | val loss=1.9150 acc1=21.00%
+2026-05-07 08:43:17 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=21.00%)
+2026-05-07 08:43:18 | INFO     | caers_train | Epoch 3/30 started
+2026-05-07 08:47:29 | INFO     | caers_train | Epoch 3/30 finished | train loss=1.9090 acc1=20.74% | val loss=1.9112 acc1=20.55%
+2026-05-07 08:47:29 | INFO     | caers_train | Epoch 4/30 started
+2026-05-07 08:51:40 | INFO     | caers_train | Epoch 4/30 finished | train loss=1.8910 acc1=22.33% | val loss=1.8760 acc1=23.82%
+2026-05-07 08:51:40 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=23.82%)
+2026-05-07 08:51:41 | INFO     | caers_train | Epoch 5/30 started
+2026-05-07 08:55:52 | INFO     | caers_train | Epoch 5/30 finished | train loss=1.8619 acc1=24.20% | val loss=1.8692 acc1=23.43%
+2026-05-07 08:55:52 | INFO     | caers_train | Epoch 6/30 started
+2026-05-07 09:00:02 | INFO     | caers_train | Epoch 6/30 finished | train loss=1.7987 acc1=27.83% | val loss=1.7286 acc1=31.12%
+2026-05-07 09:00:03 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=31.12%)
+2026-05-07 09:00:04 | INFO     | caers_train | Epoch 7/30 started
+2026-05-07 09:04:15 | INFO     | caers_train | Epoch 7/30 finished | train loss=1.6747 acc1=33.60% | val loss=1.6510 acc1=34.82%
+2026-05-07 09:04:15 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=34.82%)
+2026-05-07 09:04:16 | INFO     | caers_train | Epoch 8/30 started
+2026-05-07 09:08:27 | INFO     | caers_train | Epoch 8/30 finished | train loss=1.4906 acc1=41.59% | val loss=1.4019 acc1=45.02%
+2026-05-07 09:08:27 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=45.02%)
+2026-05-07 09:08:28 | INFO     | caers_train | Epoch 9/30 started
+2026-05-07 09:12:39 | INFO     | caers_train | Epoch 9/30 finished | train loss=1.3125 acc1=48.88% | val loss=1.2406 acc1=52.29%
+2026-05-07 09:12:39 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=52.29%)
+2026-05-07 09:12:40 | INFO     | caers_train | Epoch 10/30 started
+2026-05-07 09:16:51 | INFO     | caers_train | Epoch 10/30 finished | train loss=1.1440 acc1=55.39% | val loss=1.1336 acc1=57.14%
+2026-05-07 09:16:51 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=57.14%)
+2026-05-07 09:16:52 | INFO     | caers_train | Epoch 11/30 started
+2026-05-07 09:21:03 | INFO     | caers_train | Epoch 11/30 finished | train loss=1.0047 acc1=61.67% | val loss=1.0092 acc1=64.06%
+2026-05-07 09:21:03 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=64.06%)
+2026-05-07 09:21:04 | INFO     | caers_train | Epoch 12/30 started
+2026-05-07 09:25:15 | INFO     | caers_train | Epoch 12/30 finished | train loss=0.8615 acc1=68.03% | val loss=0.9929 acc1=65.94%
+2026-05-07 09:25:16 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=65.94%)
+2026-05-07 09:25:17 | INFO     | caers_train | Epoch 13/30 started
+2026-05-07 09:29:28 | INFO     | caers_train | Epoch 13/30 finished | train loss=0.7328 acc1=73.48% | val loss=0.9551 acc1=69.69%
+2026-05-07 09:29:28 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=69.69%)
+2026-05-07 09:29:29 | INFO     | caers_train | Epoch 14/30 started
+2026-05-07 09:33:40 | INFO     | caers_train | Epoch 14/30 finished | train loss=0.6250 acc1=78.11% | val loss=0.9103 acc1=70.45%
+2026-05-07 09:33:40 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=70.45%)
+2026-05-07 09:33:41 | INFO     | caers_train | Epoch 15/30 started
+2026-05-07 09:37:52 | INFO     | caers_train | Epoch 15/30 finished | train loss=0.5284 acc1=81.83% | val loss=0.9098 acc1=72.71%
+2026-05-07 09:37:52 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=72.71%)
+2026-05-07 09:37:53 | INFO     | caers_train | Epoch 16/30 started
+2026-05-07 09:42:04 | INFO     | caers_train | Epoch 16/30 finished | train loss=0.4561 acc1=84.61% | val loss=0.9008 acc1=73.61%
+2026-05-07 09:42:04 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=73.61%)
+2026-05-07 09:42:05 | INFO     | caers_train | Epoch 17/30 started
+2026-05-07 09:46:16 | INFO     | caers_train | Epoch 17/30 finished | train loss=0.3965 acc1=86.78% | val loss=1.0700 acc1=73.61%
+2026-05-07 09:46:16 | INFO     | caers_train | Epoch 18/30 started
+2026-05-07 09:50:26 | INFO     | caers_train | Epoch 18/30 finished | train loss=0.3595 acc1=88.43% | val loss=0.9286 acc1=75.29%
+2026-05-07 09:50:27 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=75.29%)
+2026-05-07 09:50:28 | INFO     | caers_train | Epoch 19/30 started
+2026-05-07 09:54:39 | INFO     | caers_train | Epoch 19/30 finished | train loss=0.3156 acc1=89.88% | val loss=1.0320 acc1=74.31%
+2026-05-07 09:54:39 | INFO     | caers_train | Epoch 20/30 started
+2026-05-07 09:58:49 | INFO     | caers_train | Epoch 20/30 finished | train loss=0.2912 acc1=90.82% | val loss=1.0255 acc1=75.57%
+2026-05-07 09:58:50 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=75.57%)
+2026-05-07 09:58:51 | INFO     | caers_train | Epoch 21/30 started
+2026-05-07 10:03:02 | INFO     | caers_train | Epoch 21/30 finished | train loss=0.2563 acc1=91.90% | val loss=0.9990 acc1=77.04%
+2026-05-07 10:03:02 | INFO     | caers_train | Saved best model -> checkpoints/glamor_net/best_model.pt (val_acc1=77.04%)
+2026-05-07 10:03:03 | INFO     | caers_train | Epoch 22/30 started
+2026-05-07 10:07:14 | INFO     | caers_train | Epoch 22/30 finished | train loss=0.2390 acc1=92.69% | val loss=1.1598 acc1=75.47%
+2026-05-07 10:07:14 | INFO     | caers_train | Epoch 23/30 started
