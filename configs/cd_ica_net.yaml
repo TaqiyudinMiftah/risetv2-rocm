@@ -1,0 +1,37 @@
+method: cd_ica_net
+seed: 42
+
+dataset:
+  dataset_root: "./caer_dataset"
+  image_extensions: [".jpg", ".jpeg", ".png"]
+  create_val_split: true
+  val_ratio: 0.1
+  image_size: 224
+
+outputs:
+  manifest_path: "artifacts/manifest.jsonl"
+  diagnostics_path: "artifacts/diagnostics.json"
+
+train:
+  batch_size: 32
+  num_epochs: 50
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  num_workers: 4
+  device: ""
+  save_dir: "checkpoints"
+  stream_mode: "multimodal"
+
+model:
+  backbone: "resnet18"
+  pretrained: true
+  dropout: 0.5
+  num_iterations: 3
+  confounder_dim: 512
+  num_confounders: 128
+  ccim_strategy: "dp_cause"
+  aa_hidden_dim: 256
+  df_hidden_dim: 512
+  alpha_ica: 0.5
+  beta_reg: 0.1
+  flood_level: 0.05

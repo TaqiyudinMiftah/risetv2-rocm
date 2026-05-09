@@ -10,6 +10,7 @@ Repository ini berisi pipeline modular untuk emosi recognition pada dataset **CA
 | `zhou_cross_attention` | Zhou et al., "Emotion Recognition from Large-Scale Video Clips with Cross-Attention and Hybrid Feature Weighting Neural Networks", IJERPH 2023 | Ready |
 | `yang_ccim` | Yang et al., "Context De-Confounded Emotion Recognition", CVPR 2023 | Ready |
 | `glamor_net` | Le et al., "Global-Local Attention for Emotion Recognition", Neural Computing and Applications, 2022 | Ready |
+| `cd_ica_net` | **CD-ICA-Net (Proposed)** — Causal Debiasing Iterative Cross-Attention Network | Ready |
 
 ## Struktur Repository (Multi-Method)
 
@@ -53,6 +54,12 @@ Repository ini berisi pipeline modular untuk emosi recognition pada dataset **CA
 │   │   │   └── confounder_builder.py
 │   │   └── glamor_net/          # Le et al. (GLAMOR-Net) method
 │   │       └── model.py
+│   └── cd_ica_net/          # CD-ICA-Net (proposed method)
+│       ├── model.py
+│       ├── ica_module.py
+│       ├── ccim_module.py
+│       ├── fusion_module.py
+│       └── confounder_builder.py
 │   └── utils/
 │       ├── io_utils.py
 │       └── data_manifest.py
@@ -144,6 +151,9 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 # Le et al. GLAMOR-Net (global-local attention)
 ./bin/train.sh --config configs/glamor_net.yaml
 
+# CD-ICA-Net (proposed)
+./bin/train.sh --config configs/cd_ica_net.yaml
+
 # Dengan augmentasi
 ./bin/train.sh --config configs/zhou_cross_attention.yaml --augment
 
@@ -168,6 +178,9 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 
 # Le et al. GLAMOR-Net
 ./bin/evaluate.sh --config configs/glamor_net.yaml
+
+# CD-ICA-Net (proposed)
+./bin/evaluate.sh --config configs/cd_ica_net.yaml
 
 # Custom checkpoint
 ./bin/evaluate.sh --config configs/caernet.yaml --checkpoint checkpoints/caernet/best_model.pt

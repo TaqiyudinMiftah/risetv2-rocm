@@ -16,6 +16,7 @@ def train_one_epoch(
     optimizer: torch.optim.Optimizer,
     criterion: nn.Module,
     device: torch.device,
+    loss_fn: Any | None = None,
 ) -> dict[str, float]:
     model.train()
     tracker = MetricTracker()
@@ -28,7 +29,10 @@ def train_one_epoch(
 
         optimizer.zero_grad()
         out = model(face, context)
-        loss = criterion(out["logits"], labels)
+        if loss_fn is not None:
+            loss = loss_fn(out, labels)
+        else:
+            loss = criterion(out["logits"], labels)
         loss.backward()
         optimizer.step()
 

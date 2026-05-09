@@ -91,6 +91,22 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
             classifier_hidden_dim=model_cfg.classifier_hidden_dim,
         )
 
+    if method == "cd_ica_net":
+        from models.cd_ica_net.model import CDICANet
+
+        return CDICANet(
+            num_classes=num_classes,
+            backbone=model_cfg.backbone,
+            pretrained=model_cfg.pretrained,
+            dropout=model_cfg.dropout,
+            num_iterations=model_cfg.num_iterations,
+            confounder_dim=model_cfg.confounder_dim,
+            num_confounders=model_cfg.num_confounders,
+            ccim_strategy=model_cfg.ccim_strategy,
+            aa_hidden_dim=model_cfg.aa_hidden_dim,
+            df_hidden_dim=model_cfg.df_hidden_dim,
+        )
+
     raise ValueError(f"Unsupported method: {method}")
 
 
@@ -153,6 +169,15 @@ def main() -> None:
                 "stream_mode": cfg.train.stream_mode,
                 "image_size": cfg.dataset.image_size,
                 "val_ratio": cfg.dataset.val_ratio,
+                **({
+                    "num_iterations": cfg.model.num_iterations,
+                    "confounder_dim": cfg.model.confounder_dim,
+                    "num_confounders": cfg.model.num_confounders,
+                    "ccim_strategy": cfg.model.ccim_strategy,
+                    "alpha_ica": cfg.model.alpha_ica,
+                    "beta_reg": cfg.model.beta_reg,
+                    "flood_level": cfg.model.flood_level,
+                } if cfg.method == "cd_ica_net" else {}),
             },
         )
 
@@ -220,8 +245,69 @@ def main() -> None:
                 model.set_confounder_dict(conf_dict, conf_prior)
                 logger.info("Confounder dictionary built and saved to %s", confounder_path)
 
+        # For CD-ICA-Net: build confounder dictionary if not already set
+        if cfg.method == "cd_ica_net":
+            confounder_path = cfg.train.save_dir / "confounder_dict.pt"
+            if confounder_path.exists() and not args.resume:
+                logger.info("Loading existing confounder dictionary from %s", confounder_path)
+                ckpt = torch.load(confounder_path, map_location="cpu")
+                model.set_confounder_dict(ckpt["confounder_dict"], ckpt["confounder_prior"])
+            else:
+                logger.info("Building confounder dictionary from training data...")
+                from models.cd_ica_net.confounder_builder import build_confounder_for_dataset
+
+                conf_dict, conf_prior = build_confounder_for_dataset(
+                    manifest_path=cfg.outputs.manifest_path,
+                    dataset_root=cfg.dataset.dataset_root,
+                    backbone=cfg.model.backbone,
+                    pretrained=cfg.model.pretrained,
+                    image_size=cfg.dataset.image_size,
+                    num_confounders=cfg.model.num_confounders,
+                    batch_size=cfg.train.batch_size,
+                    num_workers=cfg.train.num_workers,
+                    device=device,
+                    seed=cfg.seed,
+                    save_path=confounder_path,
+                )
+                model.set_confounder_dict(conf_dict, conf_prior)
+                logger.info("Confounder dictionary built and saved to %s", confounder_path)
+
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
+
+        # Custom loss function for CD-ICA-Net
+        loss_fn = None
+        if cfg.method == "cd_ica_net":
+            import torch.nn.functional as F
+
+            alpha_ica = cfg.model.alpha_ica
+            beta_reg = cfg.model.beta_reg
+            flood_level = cfg.model.flood_level
+
+            def _cd_ica_loss_fn(out: dict[str, Any], labels: torch.Tensor) -> torch.Tensor:
+                ce = F.cross_entropy(out["logits"], labels)
+                # Flooding (Ishida et al. 2020)
+                ce = (ce - flood_level).abs() + flood_level
+
+                # Causal intervention loss: KL(P(Y|X) || P(Y|do(X)))
+                loss_ica = torch.tensor(0.0, device=ce.device)
+                if "causal_logits" in out:
+                    p_standard = F.log_softmax(out["logits"], dim=1)
+                    p_causal = F.softmax(out["causal_logits"], dim=1)
+                    loss_ica = F.kl_div(p_standard, p_causal, reduction="batchmean")
+
+                # Regularization on causal projection weights
+                l_reg = torch.tensor(0.0, device=ce.device)
+                if hasattr(model, "ccim"):
+                    l_reg = model.ccim.w_h.pow(2).sum() + model.ccim.w_g.pow(2).sum()
+
+                return ce + alpha_ica * loss_ica + beta_reg * l_reg
+
+            loss_fn = _cd_ica_loss_fn
+            logger.info(
+                "CD-ICA-Net custom loss | alpha_ica=%.3f beta_reg=%.3f flood=%.3f",
+                alpha_ica, beta_reg, flood_level,
+            )
 
         # Log model architecture
         wandb.watch(model, log="all", log_freq=100)
@@ -244,7 +330,7 @@ def main() -> None:
 
         for epoch in range(start_epoch, cfg.train.num_epochs):
             logger.info("Epoch %d/%d started", epoch + 1, cfg.train.num_epochs)
-            train_metrics = train_one_epoch(model, loader_train, optimizer, criterion, device)
+            train_metrics = train_one_epoch(model, loader_train, optimizer, criterion, device, loss_fn=loss_fn)
             val_metrics = evaluate(model, loader_val, criterion, device)
 
             logger.info(

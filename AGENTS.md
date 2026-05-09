@@ -22,13 +22,12 @@ Implement **CD-ICA-Net**, a new architecture that simultaneously solves:
 
 ## Current Codebase Status
 
-This repo currently contains **baseline reproductions** for comparison:
+This repo contains **baseline reproductions** plus the **proposed method**:
 - `caernet` — CAER-Net (ICCV 2019)
 - `zhou_cross_attention` — CAHFW-Net (IJERPH 2023)
 - `yang_ccim` — Context De-confounded Emotion Recognition (CVPR 2023)
 - `glamor_net` — GLAMOR-Net (Neural Computing and Applications, 2022)
-
-The final goal is to add `cd_ica_net` as the proposed method alongside these baselines.
+- `cd_ica_net` — **CD-ICA-Net (Proposed)** ✅ Implemented
 
 ## Architecture to Implement (5 Stages)
 
@@ -72,7 +71,7 @@ See `docs/05_training_strategy.md`:
 │   ├── zhou_cross_attention.yaml
 │   ├── yang_ccim.yaml
 │   ├── glamor_net.yaml
-│   └── cd_ica_net.yaml     # TODO: add this
+│   └── cd_ica_net.yaml
 ├── scripts/
 │   ├── build_caers_manifest.py
 │   ├── smoke_data_pipeline.py
@@ -94,12 +93,12 @@ See `docs/05_training_strategy.md`:
 │   │   ├── zhou_cross_attention/
 │   │   ├── yang_ccim/
 │   │   ├── glamor_net/
-│   │   └── cd_ica_net/     # TODO: add this directory
-│   │       ├── model.py    # Main CD-ICA-Net model
-│   │       ├── ica_module.py        # Iterative Bidirectional Cross-Attention
-│   │       ├── ccim_module.py       # Integrated causal debiasing
-│   │       ├── fusion_module.py     # Hybrid Adaptive Fusion (AA + DF)
-│   │       └── confounder_builder.py # Offline K-Means++ confounder dict
+│   │   └── cd_ica_net/         # CD-ICA-Net (proposed)
+│           ├── model.py    # Main CD-ICA-Net model
+│           ├── ica_module.py        # Iterative Bidirectional Cross-Attention
+│           ├── ccim_module.py       # Integrated causal debiasing
+│           ├── fusion_module.py     # Hybrid Adaptive Fusion (AA + DF)
+│           └── confounder_builder.py # Offline K-Means++ confounder dict
 │   └── utils/
 │       ├── io_utils.py
 │       └── data_manifest.py
@@ -159,14 +158,21 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 5. **Flooding**: Implement `L_ce` with flooding level α_flood = 0.05.
 6. **W&B Logging**: All training/eval scripts automatically log to Weights & Biases. Set `WANDB_API_KEY` and `WANDB_PROJECT` env vars if needed.
 
-## How to Add CD-ICA-Net
+## CD-ICA-Net Implementation Status
 
-1. Create `src/models/cd_ica_net/` with model components.
-2. Implement `model.py` with `forward(face_image, context_image)`.
-3. Create `configs/cd_ica_net.yaml`.
-4. Register in `src/config/config.py`, `scripts/train.py`, `scripts/evaluate.py`.
-5. Add bash scripts to `bin/` if method-specific helpers are needed.
-6. Update `README.md` to include `cd_ica_net` in method tables.
+✅ **Fully implemented** with the following components:
+- `ica_module.py` — Iterative Bidirectional Cross-Attention (N configurable rounds)
+- `ccim_module.py` — Integrated Causal Debiasing (after cross-attention, not raw features)
+- `fusion_module.py` — Hybrid Adaptive Fusion (AA + DF blocks)
+- `confounder_builder.py` — Offline K-Means++ confounder dictionary builder
+- `model.py` — Main CD-ICA-Net model with `forward(face_image, context_image)`
+- `configs/cd_ica_net.yaml` — Configuration file
+- Registered in `config.py`, `train.py`, `evaluate.py`
+- Custom loss function in `train.py`: `L_total = L_ce + α·L_ica + β·L_reg` with flooding
+
+### Notes
+- **3-phase training** (Phase 1: backbone, Phase 2: ICA, Phase 3: end-to-end) is documented in `docs/05_training_strategy.md` but not yet fully automated in the trainer. Currently training runs end-to-end with the custom loss.
+- Gradient clipping (`max_norm=1.0`) should be added to the training loop for stability with iterative attention.
 
 ## Running Experiments
 

@@ -108,6 +108,7 @@ CONFIGS=(
     "${CONFIGS_DIR}/zhou_cross_attention.yaml"
     "${CONFIGS_DIR}/yang_ccim.yaml"
     "${CONFIGS_DIR}/glamor_net.yaml"
+    "${CONFIGS_DIR}/cd_ica_net.yaml"
 )
 
 echo "============================================================"

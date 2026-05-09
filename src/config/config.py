@@ -83,6 +83,22 @@ class GLAMORNetConfig:
     classifier_hidden_dim: int = 128 # Final classifier hidden dim
 
 
+@dataclass
+class CDICANetConfig:
+    backbone: str = "resnet18"
+    pretrained: bool = True
+    dropout: float = 0.5
+    num_iterations: int = 3          # N: iterative CA rounds
+    confounder_dim: int = 512        # CCIM feature / confounder dimension
+    num_confounders: int = 128       # K: confounder dictionary size
+    ccim_strategy: str = "dp_cause"  # "dp_cause" or "ad_cause"
+    aa_hidden_dim: int = 256         # Adaptive-Attention hidden dim
+    df_hidden_dim: int = 512         # Deep Fusion hidden dim
+    alpha_ica: float = 0.5           # Weight for L_ica
+    beta_reg: float = 0.1            # Weight for L_reg
+    flood_level: float = 0.05        # Flooding level for L_ce
+
+
 # ---------------------------------------------------------------------------
 # App config
 # ---------------------------------------------------------------------------
@@ -214,6 +230,21 @@ def load_config(config_path: str | Path) -> AppConfig:
             gla_hidden_dim=int(model_raw.get("gla_hidden_dim", 128)),
             fusion_hidden_dim=int(model_raw.get("fusion_hidden_dim", 128)),
             classifier_hidden_dim=int(model_raw.get("classifier_hidden_dim", 128)),
+        )
+    elif method == "cd_ica_net":
+        model_cfg = CDICANetConfig(
+            backbone=str(model_raw.get("backbone", "resnet18")),
+            pretrained=bool(model_raw.get("pretrained", True)),
+            dropout=float(model_raw.get("dropout", 0.5)),
+            num_iterations=int(model_raw.get("num_iterations", 3)),
+            confounder_dim=int(model_raw.get("confounder_dim", 512)),
+            num_confounders=int(model_raw.get("num_confounders", 128)),
+            ccim_strategy=str(model_raw.get("ccim_strategy", "dp_cause")),
+            aa_hidden_dim=int(model_raw.get("aa_hidden_dim", 256)),
+            df_hidden_dim=int(model_raw.get("df_hidden_dim", 512)),
+            alpha_ica=float(model_raw.get("alpha_ica", 0.5)),
+            beta_reg=float(model_raw.get("beta_reg", 0.1)),
+            flood_level=float(model_raw.get("flood_level", 0.05)),
         )
     else:
         raise ValueError(f"Unsupported method: {method}")

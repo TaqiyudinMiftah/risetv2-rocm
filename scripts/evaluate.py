@@ -86,6 +86,22 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
             classifier_hidden_dim=model_cfg.classifier_hidden_dim,
         )
 
+    if method == "cd_ica_net":
+        from models.cd_ica_net.model import CDICANet
+
+        return CDICANet(
+            num_classes=num_classes,
+            backbone=model_cfg.backbone,
+            pretrained=model_cfg.pretrained,
+            dropout=model_cfg.dropout,
+            num_iterations=model_cfg.num_iterations,
+            confounder_dim=model_cfg.confounder_dim,
+            num_confounders=model_cfg.num_confounders,
+            ccim_strategy=model_cfg.ccim_strategy,
+            aa_hidden_dim=model_cfg.aa_hidden_dim,
+            df_hidden_dim=model_cfg.df_hidden_dim,
+        )
+
     raise ValueError(f"Unsupported method: {method}")
 
 
@@ -175,6 +191,32 @@ def main() -> None:
             else:
                 logger.warning("Confounder dictionary not found. Building from scratch...")
                 from models.yang_ccim.confounder_builder import build_confounder_for_dataset
+
+                conf_dict, conf_prior = build_confounder_for_dataset(
+                    manifest_path=cfg.outputs.manifest_path,
+                    dataset_root=cfg.dataset.dataset_root,
+                    backbone=cfg.model.backbone,
+                    pretrained=cfg.model.pretrained,
+                    image_size=cfg.dataset.image_size,
+                    num_confounders=cfg.model.num_confounders,
+                    batch_size=cfg.train.batch_size,
+                    num_workers=cfg.train.num_workers,
+                    device=device,
+                    seed=cfg.seed,
+                )
+                model.set_confounder_dict(conf_dict, conf_prior)
+                logger.info("Confounder dictionary built")
+
+        # For CD-ICA-Net: load confounder dictionary
+        if cfg.method == "cd_ica_net":
+            confounder_path = cfg.train.save_dir / "confounder_dict.pt"
+            if confounder_path.exists():
+                logger.info("Loading confounder dictionary from %s", confounder_path)
+                ckpt_conf = torch.load(confounder_path, map_location="cpu")
+                model.set_confounder_dict(ckpt_conf["confounder_dict"], ckpt_conf["confounder_prior"])
+            else:
+                logger.warning("Confounder dictionary not found. Building from scratch...")
+                from models.cd_ica_net.confounder_builder import build_confounder_for_dataset
 
                 conf_dict, conf_prior = build_confounder_for_dataset(
                     manifest_path=cfg.outputs.manifest_path,
