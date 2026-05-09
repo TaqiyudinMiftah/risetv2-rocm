@@ -20,7 +20,8 @@ Repository ini berisi pipeline modular untuk emosi recognition pada dataset **CA
 │   ├── build_manifest.sh        # Build data manifest
 │   ├── smoke_test.sh            # Data pipeline smoke test
 │   ├── train.sh                 # Unified training script
-│   └── evaluate.sh              # Unified evaluation script
+│   ├── evaluate.sh              # Unified evaluation script
+│   └── run_all_models.sh        # Run train/eval for all models
 ├── configs/
 │   ├── caernet.yaml             # CAER-Net config
 │   ├── zhou_cross_attention.yaml # Zhou et al. config
@@ -171,6 +172,26 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 # Custom checkpoint
 ./bin/evaluate.sh --config configs/caernet.yaml --checkpoint checkpoints/caernet/best_model.pt
 ```
+
+### 5. Run All Models (Batch)
+
+Jalankan training atau evaluasi untuk **semua model secara berurutan** dengan satu perintah:
+
+```bash
+# Training semua model
+./bin/run_all_models.sh --mode train
+
+# Training semua model dengan augmentasi + W&B offline
+./bin/run_all_models.sh --mode train --augment --offline
+
+# Evaluasi semua model pada split test
+./bin/run_all_models.sh --mode evaluate --split test
+
+# Evaluasi semua model pada split val + offline
+./bin/run_all_models.sh --mode evaluate --split val --offline
+```
+
+Script ini menjalankan model secara sequential dengan fail-safe: jika satu model gagal, script tetap melanjutkan ke model berikutnya dan menampilkan summary sukses/gagal di akhir.
 
 ## Ablation Studies (CAER-Net)
 
