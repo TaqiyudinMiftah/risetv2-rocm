@@ -2,15 +2,15 @@ method: cd_ica_net
 seed: 42
 
 dataset:
-  dataset_root: "./caer_dataset"
-  image_extensions: [".jpg", ".jpeg", ".png"]
+  dataset_root: /home/taqiyudinmiftah/risetv2/caer_dataset/CAER-S
+  image_extensions: [".png", ".jpg", ".jpeg", ".bmp", ".webp"]
   create_val_split: true
   val_ratio: 0.1
   image_size: 224
 
 outputs:
-  manifest_path: "artifacts/manifest.jsonl"
-  diagnostics_path: "artifacts/diagnostics.json"
+  manifest_path: artifacts/caers/manifest_caers.jsonl
+  diagnostics_path: artifacts/caers/diagnostics_caers.json
 
 train:
   batch_size: 32
