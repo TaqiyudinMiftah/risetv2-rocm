@@ -120,6 +120,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--wandb-entity", type=str, default="", help="W&B entity/team name")
     parser.add_argument("--wandb-run-name", type=str, default="", help="W&B run name (auto-generated if empty)")
     parser.add_argument("--wandb-offline", action="store_true", help="Run W&B in offline mode")
+    parser.add_argument("--resume-run-id", type=str, default="", help="Resume an existing W&B run ID to log evaluation into the same session")
     return parser.parse_args()
 
 
@@ -142,13 +143,19 @@ def main() -> None:
 
         # Initialize W&B
         wandb_mode = "offline" if args.wandb_offline else "online"
-        run_name = args.wandb_run_name or f"eval-{cfg.method}-{cfg.model.backbone}"
-        run = wandb.init(
+        run_name = args.wandb_run_name or (f"eval-{cfg.method}-{cfg.model.backbone}" if not args.resume_run_id else None)
+        init_kwargs = dict(
             project=args.wandb_project,
             entity=args.wandb_entity or None,
             name=run_name,
             mode=wandb_mode,
-            job_type="evaluation",
+        )
+        if args.resume_run_id:
+            init_kwargs["id"] = args.resume_run_id
+            init_kwargs["resume"] = "must"
+        else:
+            init_kwargs["job_type"] = "evaluation"
+        run = wandb.init(**init_kwargs,
             config={
                 "method": cfg.method,
                 "eval_split": args.split,

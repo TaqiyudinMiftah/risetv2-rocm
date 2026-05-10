@@ -186,10 +186,16 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 # Train single model
 ./bin/train.sh --config configs/cd_ica_net.yaml
 
-# Evaluate single model
+# Train + auto-evaluate test set in the same W&B run
+./bin/train.sh --config configs/cd_ica_net.yaml --eval-after-train
+
+# Evaluate single model (new W&B run)
 ./bin/evaluate.sh --config configs/cd_ica_net.yaml
 
-# Train all baselines + proposed (once cd_ica_net is ready)
+# Evaluate into an existing W&B run (same session as training)
+./bin/evaluate.sh --config configs/cd_ica_net.yaml --resume-run-id <RUN_ID>
+
+# Train all baselines + proposed
 ./bin/run_all_models.sh --mode train
 ```
 

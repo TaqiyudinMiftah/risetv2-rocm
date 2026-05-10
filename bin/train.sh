@@ -48,16 +48,21 @@ while [[ $# -gt 0 ]]; do
             AUGMENT="--augment"
             shift
             ;;
+        --eval-after-train)
+            EVAL_AFTER_TRAIN="--eval-after-train"
+            shift
+            ;;
         --help|-h)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --resume PATH      Resume from checkpoint"
-            echo "  --run-name NAME    W&B run name"
-            echo "  --offline          Run W&B in offline mode"
-            echo "  --config PATH      Custom config file path"
-            echo "  --augment          Enable data augmentation"
-            echo "  --help, -h         Show this help"
+            echo "  --resume PATH           Resume from checkpoint"
+            echo "  --run-name NAME         W&B run name"
+            echo "  --offline               Run W&B in offline mode"
+            echo "  --config PATH           Custom config file path"
+            echo "  --augment               Enable data augmentation"
+            echo "  --eval-after-train      Evaluate on test set after training (same W&B run)"
+            echo "  --help, -h              Show this help"
             exit 0
             ;;
         *)
@@ -74,6 +79,7 @@ WANDB_ENTITY="${WANDB_ENTITY:-}"
 WANDB_RUN_NAME="${WANDB_RUN_NAME:-}"
 WANDB_OFFLINE="${WANDB_OFFLINE:-}"
 AUGMENT="${AUGMENT:-}"
+EVAL_AFTER_TRAIN="${EVAL_AFTER_TRAIN:-}"
 
 echo "================================"
 echo "Training Emotion Recognition"
@@ -99,6 +105,7 @@ CMD=(
 [ -n "$WANDB_OFFLINE" ] && CMD+=($WANDB_OFFLINE)
 [ -n "${RESUME_CHECKPOINT:-}" ] && CMD+=(--resume "$RESUME_CHECKPOINT")
 [ -n "$AUGMENT" ] && CMD+=($AUGMENT)
+[ -n "$EVAL_AFTER_TRAIN" ] && CMD+=($EVAL_AFTER_TRAIN)
 
 # Run training
 echo "Running: ${CMD[*]}"

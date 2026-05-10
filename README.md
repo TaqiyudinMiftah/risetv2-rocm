@@ -162,6 +162,9 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 
 # Resume dari checkpoint
 ./bin/train.sh --config configs/caernet.yaml --resume checkpoints/caernet/best_model.pt
+
+# Training + evaluasi test dalam satu W&B run
+./bin/train.sh --config configs/cd_ica_net.yaml --eval-after-train
 ```
 
 ### 4. Evaluate
@@ -184,6 +187,9 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 
 # Custom checkpoint
 ./bin/evaluate.sh --config configs/caernet.yaml --checkpoint checkpoints/caernet/best_model.pt
+
+# Evaluasi dengan melanjutkan W&B run yang sama (gunakan run ID dari training)
+./bin/evaluate.sh --config configs/cd_ica_net.yaml --resume-run-id <RUN_ID> --checkpoint checkpoints/cd_ica_net/best_model.pt
 ```
 
 ### 5. Run All Models (Batch)

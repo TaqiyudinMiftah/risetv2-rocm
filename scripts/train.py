@@ -18,7 +18,7 @@ if str(SRC_DIR) not in sys.path:
 from config.config import load_config
 from datasets.caers_dataset import CAERSTwoStreamDataset
 from datasets.transforms import default_transform, augmented_transform
-from engine.evaluator import evaluate
+from engine.evaluator import evaluate, evaluate_per_class
 from engine.trainer import train_one_epoch
 from utils.device_utils import get_device, set_seed_all
 from utils.io_utils import ensure_parent_dir, write_json
@@ -125,6 +125,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--wandb-run-name", type=str, default="", help="W&B run name (auto-generated if empty)")
     parser.add_argument("--wandb-offline", action="store_true", help="Run W&B in offline mode")
     parser.add_argument("--augment", action="store_true", help="Use data augmentation for training")
+    parser.add_argument("--eval-after-train", action="store_true", help="Evaluate on test split after training and log to the same W&B run")
     return parser.parse_args()
 
 
@@ -394,6 +395,66 @@ def main() -> None:
         wandb.run.summary["best_val_acc"] = best_val_acc
         wandb.run.summary["total_epochs"] = cfg.train.num_epochs
         wandb.save(str(history_path))
+
+        # -------------------------------------------------------------------
+        # Evaluate on test set (same W&B run)
+        # -------------------------------------------------------------------
+        if args.eval_after_train:
+            logger.info("Evaluating on test split (same W&B run)...")
+            from engine.evaluator import evaluate_per_class
+
+            ds_test = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split="test",
+                image_size=cfg.dataset.image_size,
+                transform=val_transform,
+            )
+            loader_test = DataLoader(
+                ds_test,
+                batch_size=cfg.train.batch_size,
+                shuffle=False,
+                num_workers=cfg.train.num_workers,
+                pin_memory=True,
+            )
+
+            test_metrics = evaluate(model, loader_test, criterion, device)
+            test_per_class = evaluate_per_class(model, loader_test, device, ds_test.index_to_label)
+
+            logger.info("Test results | loss=%.4f acc1=%.2f%% acc5=%.2f%%", test_metrics["loss"], test_metrics["acc1"], test_metrics["acc5"])
+            for label_name, acc in test_per_class["per_class_acc"].items():
+                logger.info("  %s: %.2f%%", label_name, acc)
+
+            # Log test metrics to the SAME W&B run
+            wandb.log({
+                "test/loss": test_metrics["loss"],
+                "test/acc1": test_metrics["acc1"],
+                "test/acc5": test_metrics["acc5"],
+                "test/overall_acc": test_per_class["overall_acc"],
+            })
+
+            # Per-class accuracy table
+            class_data = [[label_name, acc] for label_name, acc in test_per_class["per_class_acc"].items()]
+            class_table = wandb.Table(columns=["class", "accuracy"], data=class_data)
+            wandb.log({"test/per_class_accuracy": class_table})
+
+            # Update run summary
+            wandb.run.summary["test_acc1"] = test_metrics["acc1"]
+            wandb.run.summary["test_acc5"] = test_metrics["acc5"]
+            wandb.run.summary["test_overall_acc"] = test_per_class["overall_acc"]
+
+            # Save test eval JSON
+            out = {
+                "method": cfg.method,
+                "split": "test",
+                "metrics": test_metrics,
+                "per_class_acc": test_per_class["per_class_acc"],
+                "overall_acc": test_per_class["overall_acc"],
+            }
+            test_out_path = cfg.train.save_dir / "eval_test.json"
+            write_json(test_out_path, out)
+            wandb.save(str(test_out_path))
+            logger.info("Test evaluation saved to %s", test_out_path)
 
         wandb.finish()
     except Exception:
