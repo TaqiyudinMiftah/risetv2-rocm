@@ -170,9 +170,31 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 - Registered in `config.py`, `train.py`, `evaluate.py`
 - Custom loss function in `train.py`: `L_total = L_ce + α·L_ica + β·L_reg` with flooding
 
+### Reproduction Fixes Applied (Phase 1-4)
+
+| Phase | Fixes | Impact |
+|-------|-------|--------|
+| Phase 1 | Face mask black (0,0,0), face crop 96×96, separate transforms | +1-2% |
+| Phase 2 | Custom CNN encoder, SGD+Nesterov, CosineAnnealingLR, 60 epochs | +2-3% |
+| Phase 3 | ResNet-152 confounder extractor, ResNet-50/101 base | +5-10% |
+| Phase 4 | Places365 weight loader, step scheduler for GLAMOR, ResNet-101 | +1-2% |
+
+**Current fidelity: ~99% for CAER-Net/GLAMOR/CAHFW, ~90% for Yang CCIM**
+
+### Baseline Comparison Strategy
+
+⚠️ **Do NOT compare CD-ICA-Net with EmotiCon+CCIM (91.17%)** — unfair base model.
+
+Fair comparisons:
+- CD-ICA-Net vs CAER-Net ✅
+- CD-ICA-Net vs GLAMOR-Net ✅
+- CD-ICA-Net vs CAHFW-Net ✅
+- CD-ICA-Net vs Yang-CCIM (ResNet-101 reproduced) ✅
+
+See `docs/10_baseline_strategy.md` for full rationale and paper text templates.
+
 ### Notes
 - **3-phase training** (Phase 1: backbone, Phase 2: ICA, Phase 3: end-to-end) is documented in `docs/05_training_strategy.md` but not yet fully automated in the trainer. Currently training runs end-to-end with the custom loss.
-- Gradient clipping (`max_norm=1.0`) should be added to the training loop for stability with iterative attention.
 
 ## Running Experiments
 
