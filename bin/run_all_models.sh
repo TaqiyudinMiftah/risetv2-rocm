@@ -64,26 +64,32 @@ while [[ $# -gt 0 ]]; do
             EXTRA_ARGS+=("$1" "$2")
             shift 2
             ;;
+        --eval-after-train)
+            EXTRA_ARGS+=("$1")
+            shift
+            ;;
         --help|-h)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Run training or evaluation for ALL available models sequentially."
             echo ""
-            echo "Models executed: caernet, zhou_cross_attention, yang_ccim, glamor_net"
+            echo "Models executed: caernet, zhou_cross_attention, yang_ccim, glamor_net, cd_ica_net"
             echo ""
             echo "Options:"
-            echo "  --mode MODE        Mode to run: train or evaluate (default: train)"
-            echo "  --augment          Enable data augmentation (train mode only)"
-            echo "  --offline          Run W&B in offline mode"
-            echo "  --split SPLIT      Split to evaluate: test or val (evaluate mode only)"
-            echo "  --resume PATH      Resume from checkpoint (train mode only)"
-            echo "  --run-name NAME    W&B run name"
-            echo "  --checkpoint PATH  Custom checkpoint (evaluate mode only)"
-            echo "  --help, -h         Show this help"
+            echo "  --mode MODE           Mode to run: train or evaluate (default: train)"
+            echo "  --augment             Enable data augmentation (train mode only)"
+            echo "  --eval-after-train    Evaluate test set after training in same W&B run (train only)"
+            echo "  --offline             Run W&B in offline mode"
+            echo "  --split SPLIT         Split to evaluate: test or val (evaluate mode only)"
+            echo "  --resume PATH         Resume from checkpoint (train mode only)"
+            echo "  --run-name NAME       W&B run name"
+            echo "  --checkpoint PATH     Custom checkpoint (evaluate mode only)"
+            echo "  --help, -h            Show this help"
             echo ""
             echo "Examples:"
             echo "  $0 --mode train"
             echo "  $0 --mode train --augment --offline"
+            echo "  $0 --mode train --eval-after-train"
             echo "  $0 --mode evaluate --split test"
             echo "  $0 --mode evaluate --split val --offline"
             exit 0
