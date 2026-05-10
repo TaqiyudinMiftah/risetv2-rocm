@@ -9,22 +9,29 @@ dataset:
   image_size: 224
 
 model:
-  backbone: resnet18
+  backbone: resnet50         # stronger base model (paper uses EmotiCon ~88% base)
   pretrained: true
   dropout: 0.5
-  num_confounders: 1024
+  num_confounders: 128       # paper uses 128 for CAER-S
   confounder_feature_dim: 512
-  ccim_strategy: dp_cause  # dp_cause or ad_cause
+  confounder_backbone: resnet152_places365  # paper uses ResNet-152 Places365
+  ccim_strategy: dp_cause   # dp_cause or ad_cause
 
 train:
   batch_size: 32
-  num_epochs: 30
+  num_epochs: 60
   lr: 0.001
   weight_decay: 0.0001
   num_workers: 4
   device: ""  # auto-detect: cuda / rocm / mps / cpu
   stream_mode: multimodal
   save_dir: checkpoints
+  optimizer: sgd
+  momentum: 0.9
+  nesterov: true
+  scheduler: cosine
+  eta_min: 1.0e-6
+  grad_clip_norm: 1.0
 
 outputs:
   manifest_path: artifacts/caers/manifest_caers.jsonl

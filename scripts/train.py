@@ -278,6 +278,7 @@ def main() -> None:
                     device=device,
                     seed=cfg.seed,
                     save_path=confounder_path,
+                    confounder_backbone=getattr(cfg.model, "confounder_backbone", None),
                 )
                 model.set_confounder_dict(conf_dict, conf_prior)
                 logger.info("Confounder dictionary built and saved to %s", confounder_path)
@@ -305,6 +306,7 @@ def main() -> None:
                     device=device,
                     seed=cfg.seed,
                     save_path=confounder_path,
+                    confounder_backbone=getattr(cfg.model, "confounder_backbone", None),
                 )
                 model.set_confounder_dict(conf_dict, conf_prior)
                 logger.info("Confounder dictionary built and saved to %s", confounder_path)

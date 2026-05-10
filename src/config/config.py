@@ -79,6 +79,7 @@ class YangCCIMConfig:
     dropout: float = 0.5
     num_confounders: int = 1024
     confounder_feature_dim: int = 512
+    confounder_backbone: str = ""  # e.g. "resnet152_places365" for paper setup
     ccim_strategy: str = "dp_cause"  # "dp_cause" or "ad_cause"
 
 
@@ -101,6 +102,7 @@ class CDICANetConfig:
     num_iterations: int = 3          # N: iterative CA rounds
     confounder_dim: int = 512        # CCIM feature / confounder dimension
     num_confounders: int = 128       # K: confounder dictionary size
+    confounder_backbone: str = ""    # e.g. "resnet152_places365" for paper setup
     ccim_strategy: str = "dp_cause"  # "dp_cause" or "ad_cause"
     aa_hidden_dim: int = 256         # Adaptive-Attention hidden dim
     df_hidden_dim: int = 512         # Deep Fusion hidden dim
@@ -237,6 +239,7 @@ def load_config(config_path: str | Path) -> AppConfig:
             dropout=float(model_raw.get("dropout", 0.5)),
             num_confounders=int(model_raw.get("num_confounders", 1024)),
             confounder_feature_dim=int(model_raw.get("confounder_feature_dim", 512)),
+            confounder_backbone=str(model_raw.get("confounder_backbone", "")),
             ccim_strategy=str(model_raw.get("ccim_strategy", "dp_cause")),
         )
     elif method == "glamor_net":
@@ -257,6 +260,7 @@ def load_config(config_path: str | Path) -> AppConfig:
             num_iterations=int(model_raw.get("num_iterations", 3)),
             confounder_dim=int(model_raw.get("confounder_dim", 512)),
             num_confounders=int(model_raw.get("num_confounders", 128)),
+            confounder_backbone=str(model_raw.get("confounder_backbone", "")),
             ccim_strategy=str(model_raw.get("ccim_strategy", "dp_cause")),
             aa_hidden_dim=int(model_raw.get("aa_hidden_dim", 256)),
             df_hidden_dim=int(model_raw.get("df_hidden_dim", 512)),

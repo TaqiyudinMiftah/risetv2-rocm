@@ -225,6 +225,7 @@ def main() -> None:
                     num_workers=cfg.train.num_workers,
                     device=device,
                     seed=cfg.seed,
+                    confounder_backbone=getattr(cfg.model, "confounder_backbone", None),
                 )
                 model.set_confounder_dict(conf_dict, conf_prior)
                 logger.info("Confounder dictionary built")
@@ -251,6 +252,7 @@ def main() -> None:
                     num_workers=cfg.train.num_workers,
                     device=device,
                     seed=cfg.seed,
+                    confounder_backbone=getattr(cfg.model, "confounder_backbone", None),
                 )
                 model.set_confounder_dict(conf_dict, conf_prior)
                 logger.info("Confounder dictionary built")

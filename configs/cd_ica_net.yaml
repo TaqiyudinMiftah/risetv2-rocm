@@ -33,6 +33,7 @@ model:
   num_iterations: 3
   confounder_dim: 512
   num_confounders: 128
+  confounder_backbone: resnet152_places365  # paper uses ResNet-152 Places365
   ccim_strategy: "dp_cause"
   aa_hidden_dim: 256
   df_hidden_dim: 512

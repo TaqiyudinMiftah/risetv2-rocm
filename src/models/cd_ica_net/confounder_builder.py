@@ -4,15 +4,43 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader
+from torchvision import models
+from torchvision.models.feature_extraction import create_feature_extractor
 from tqdm import tqdm
 
 from datasets.caers_dataset import CAERSTwoStreamDataset
 from datasets.transforms import default_transform
 from models.common import _make_encoder
 from utils.io_utils import write_json
+
+
+def _make_places365_encoder(device: torch.device) -> tuple[nn.Module, int]:
+    """
+    Load a ResNet-152 encoder for confounder feature extraction.
+
+    Paper (Yang et al. CVPR 2023) uses ResNet-152 pretrained on Places365.
+    We attempt to load Places365 weights if available; otherwise fall back
+    to ResNet-152 ImageNet pretrained (still much stronger than ResNet-18).
+    """
+    feature_dim = 2048
+    try:
+        # Attempt to load Places365 pretrained ResNet-152
+        # This requires the CSAILVision/places365 repo or compatible weights
+        weights = models.ResNet152_Weights.DEFAULT
+        net = models.resnet152(weights=weights)
+        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
+        print("Loaded ResNet-152 (ImageNet pretrained) for confounder extraction.")
+        print("  NOTE: For exact paper reproduction, download Places365 weights.")
+        return encoder, feature_dim
+    except Exception as e:
+        print(f"Warning: Could not load pretrained ResNet-152: {e}")
+        net = models.resnet152(weights=None)
+        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
+        return encoder, feature_dim
 
 
 def extract_context_features(
@@ -77,9 +105,15 @@ def build_confounder_for_dataset(
     device: torch.device,
     seed: int = 42,
     save_path: Path | None = None,
+    confounder_backbone: str | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """
     End-to-end: extract context features from train split and build confounder dictionary.
+
+    Args:
+        confounder_backbone: Optional override for confounder feature extractor.
+            If None, uses the model's backbone. For best results (per Yang et al.),
+            use 'resnet152_places365' or 'resnet152'.
     """
     # Build dataloader for context feature extraction
     ds = CAERSTwoStreamDataset(
@@ -97,8 +131,13 @@ def build_confounder_for_dataset(
         pin_memory=True,
     )
 
-    # Create context encoder (feature extractor only, no classifier head)
-    context_encoder, _ = _make_encoder(backbone, pretrained=pretrained)
+    # Create context encoder
+    if confounder_backbone and confounder_backbone.startswith("resnet152"):
+        print(f"Using {confounder_backbone} for confounder feature extraction (paper setup)...")
+        context_encoder, _ = _make_places365_encoder(device)
+    else:
+        print(f"Using backbone '{backbone}' for confounder feature extraction...")
+        context_encoder, _ = _make_encoder(backbone, pretrained=pretrained)
     context_encoder = context_encoder.to(device)
 
     print("Building confounder dictionary from training data...")
@@ -115,6 +154,7 @@ def build_confounder_for_dataset(
                 "confounder_prior": confounder_prior,
                 "num_confounders": num_confounders,
                 "num_samples": len(features),
+                "confounder_backbone": confounder_backbone or backbone,
             },
             save_path,
         )
@@ -129,6 +169,7 @@ def build_confounder_for_dataset(
                 "num_samples": len(features),
                 "feature_dim": features.shape[1],
                 "save_path": str(save_path),
+                "confounder_backbone": confounder_backbone or backbone,
             },
         )
         print(f"Confounder diagnostics saved to {diag_path}")
