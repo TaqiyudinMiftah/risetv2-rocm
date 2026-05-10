@@ -9,7 +9,7 @@ dataset:
   image_size: 224
 
 model:
-  backbone: resnet50         # stronger base model (paper uses EmotiCon ~88% base)
+  backbone: resnet101        # strongest available standard backbone
   pretrained: true
   dropout: 0.5
   num_confounders: 128       # paper uses 128 for CAER-S

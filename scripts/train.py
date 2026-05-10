@@ -334,6 +334,11 @@ def main() -> None:
                 optimizer, T_max=cfg.train.num_epochs, eta_min=cfg.train.eta_min
             )
             logger.info("Scheduler: CosineAnnealingLR(T_max=%d, eta_min=%.2e)", cfg.train.num_epochs, cfg.train.eta_min)
+        elif cfg.train.scheduler.lower() == "step":
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(
+                optimizer, milestones=cfg.train.step_milestones, gamma=cfg.train.step_gamma
+            )
+            logger.info("Scheduler: MultiStepLR(milestones=%s, gamma=%.2f)", cfg.train.step_milestones, cfg.train.step_gamma)
 
         # Custom loss function for CD-ICA-Net
         loss_fn = None

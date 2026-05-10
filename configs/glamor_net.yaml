@@ -19,7 +19,7 @@ model:
 
 train:
   batch_size: 32
-  num_epochs: 60
+  num_epochs: 100        # paper trains for 100 epochs with step decay
   lr: 0.001
   weight_decay: 0.0001
   num_workers: 4
@@ -29,8 +29,9 @@ train:
   optimizer: sgd
   momentum: 0.9
   nesterov: true
-  scheduler: cosine
-  eta_min: 1.0e-6
+  scheduler: step
+  step_milestones: [40, 80]  # step decay at epochs 40 and 80 per paper
+  step_gamma: 0.1
   grad_clip_norm: 1.0
 
 outputs:

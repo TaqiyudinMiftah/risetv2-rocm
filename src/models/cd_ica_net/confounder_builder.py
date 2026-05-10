@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader
@@ -16,31 +15,7 @@ from datasets.caers_dataset import CAERSTwoStreamDataset
 from datasets.transforms import default_transform
 from models.common import _make_encoder
 from utils.io_utils import write_json
-
-
-def _make_places365_encoder(device: torch.device) -> tuple[nn.Module, int]:
-    """
-    Load a ResNet-152 encoder for confounder feature extraction.
-
-    Paper (Yang et al. CVPR 2023) uses ResNet-152 pretrained on Places365.
-    We attempt to load Places365 weights if available; otherwise fall back
-    to ResNet-152 ImageNet pretrained (still much stronger than ResNet-18).
-    """
-    feature_dim = 2048
-    try:
-        # Attempt to load Places365 pretrained ResNet-152
-        # This requires the CSAILVision/places365 repo or compatible weights
-        weights = models.ResNet152_Weights.DEFAULT
-        net = models.resnet152(weights=weights)
-        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
-        print("Loaded ResNet-152 (ImageNet pretrained) for confounder extraction.")
-        print("  NOTE: For exact paper reproduction, download Places365 weights.")
-        return encoder, feature_dim
-    except Exception as e:
-        print(f"Warning: Could not load pretrained ResNet-152: {e}")
-        net = models.resnet152(weights=None)
-        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
-        return encoder, feature_dim
+from utils.places365_loader import make_places365_encoder
 
 
 def extract_context_features(
@@ -134,11 +109,11 @@ def build_confounder_for_dataset(
     # Create context encoder
     if confounder_backbone and confounder_backbone.startswith("resnet152"):
         print(f"Using {confounder_backbone} for confounder feature extraction (paper setup)...")
-        context_encoder, _ = _make_places365_encoder(device)
+        context_encoder, _ = make_places365_encoder(device)
     else:
         print(f"Using backbone '{backbone}' for confounder feature extraction...")
         context_encoder, _ = _make_encoder(backbone, pretrained=pretrained)
-    context_encoder = context_encoder.to(device)
+        context_encoder = context_encoder.to(device)
 
     print("Building confounder dictionary from training data...")
     features = extract_context_features(loader, context_encoder, device)

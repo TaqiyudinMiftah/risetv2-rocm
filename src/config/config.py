@@ -42,8 +42,10 @@ class TrainConfig:
     optimizer: str = "adamw"  # adamw, sgd
     momentum: float = 0.9
     nesterov: bool = True
-    scheduler: str = "none"  # none, cosine
+    scheduler: str = "none"  # none, cosine, step
     eta_min: float = 1e-6
+    step_milestones: list[int] = field(default_factory=lambda: [40, 80])
+    step_gamma: float = 0.1
     # Training stability
     grad_clip_norm: float = 0.0  # 0 = disabled, recommended: 1.0 for iterative attention
 
@@ -158,6 +160,11 @@ def _build_output_cfg(raw: dict[str, Any]) -> OutputConfig:
 
 
 def _build_train_cfg(raw: dict[str, Any], seed: int) -> TrainConfig:
+    milestones_raw = raw.get("step_milestones", [40, 80])
+    if isinstance(milestones_raw, str):
+        milestones = [int(x.strip()) for x in milestones_raw.strip("[]").split(",") if x.strip()]
+    else:
+        milestones = [int(x) for x in milestones_raw]
     return TrainConfig(
         batch_size=int(raw.get("batch_size", 32)),
         num_epochs=int(raw.get("num_epochs", 30)),
@@ -173,6 +180,8 @@ def _build_train_cfg(raw: dict[str, Any], seed: int) -> TrainConfig:
         nesterov=bool(raw.get("nesterov", True)),
         scheduler=str(raw.get("scheduler", "none")),
         eta_min=float(raw.get("eta_min", 1e-6)),
+        step_milestones=milestones,
+        step_gamma=float(raw.get("step_gamma", 0.1)),
         grad_clip_norm=float(raw.get("grad_clip_norm", 0.0)),
     )
 

@@ -56,6 +56,18 @@ def _make_encoder(backbone: str = "resnet18", pretrained: bool = False) -> tuple
         encoder = create_feature_extractor(net, return_nodes={"features": "feat"})
         dim = 1280
         return encoder, dim
+    if backbone == "resnet50":
+        weights = models.ResNet50_Weights.DEFAULT if pretrained else None
+        net = models.resnet50(weights=weights)
+        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
+        dim = 2048
+        return encoder, dim
+    if backbone == "resnet101":
+        weights = models.ResNet101_Weights.DEFAULT if pretrained else None
+        net = models.resnet101(weights=weights)
+        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
+        dim = 2048
+        return encoder, dim
     if backbone == "shallow_cnn":
         # Paper-specific custom CNN (no ImageNet pretraining available)
         encoder = ShallowCNNEncoder(channels_list=(32, 64, 128, 256, 256))

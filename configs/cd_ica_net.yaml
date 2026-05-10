@@ -14,14 +14,16 @@ outputs:
 
 train:
   batch_size: 32
-  num_epochs: 50
-  lr: 1.0e-4
+  num_epochs: 60
+  lr: 5.0e-4
   weight_decay: 1.0e-4
   num_workers: 4
   device: ""
   save_dir: "checkpoints"
   stream_mode: "multimodal"
-  optimizer: adamw
+  optimizer: sgd
+  momentum: 0.9
+  nesterov: true
   scheduler: cosine
   eta_min: 1.0e-6
   grad_clip_norm: 1.0
