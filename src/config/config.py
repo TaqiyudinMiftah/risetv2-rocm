@@ -50,6 +50,7 @@ class CAERNetConfig:
     backbone: str = "resnet18"
     pretrained: bool = True
     dropout: float = 0.5
+    face_size: int = 96  # face crop size per paper
 
 
 @dataclass
@@ -78,6 +79,7 @@ class GLAMORNetConfig:
     backbone: str = "resnet18"
     pretrained: bool = True
     dropout: float = 0.5
+    face_size: int = 96              # face crop size per paper
     gla_hidden_dim: int = 128        # GLA attention hidden dim
     fusion_hidden_dim: int = 128     # Fusion module hidden dim
     classifier_hidden_dim: int = 128 # Final classifier hidden dim
@@ -202,6 +204,7 @@ def load_config(config_path: str | Path) -> AppConfig:
             backbone=str(model_raw.get("backbone", "resnet18")),
             pretrained=bool(model_raw.get("pretrained", True)),
             dropout=float(model_raw.get("dropout", 0.5)),
+            face_size=int(model_raw.get("face_size", 96)),
         )
     elif method == "zhou_cross_attention":
         model_cfg = ZhouCrossAttentionConfig(
@@ -227,6 +230,7 @@ def load_config(config_path: str | Path) -> AppConfig:
             backbone=str(model_raw.get("backbone", "resnet18")),
             pretrained=bool(model_raw.get("pretrained", True)),
             dropout=float(model_raw.get("dropout", 0.5)),
+            face_size=int(model_raw.get("face_size", 96)),
             gla_hidden_dim=int(model_raw.get("gla_hidden_dim", 128)),
             fusion_hidden_dim=int(model_raw.get("fusion_hidden_dim", 128)),
             classifier_hidden_dim=int(model_raw.get("classifier_hidden_dim", 128)),

@@ -12,6 +12,7 @@ model:
   backbone: resnet18
   pretrained: true
   dropout: 0.5
+  face_size: 96  # face crop size per paper (context stays at image_size)
   gla_hidden_dim: 128
   fusion_hidden_dim: 128
   classifier_hidden_dim: 128

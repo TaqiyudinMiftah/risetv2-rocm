@@ -17,7 +17,7 @@ if str(SRC_DIR) not in sys.path:
 
 from config.config import load_config
 from datasets.caers_dataset import CAERSTwoStreamDataset
-from datasets.transforms import default_transform, augmented_transform
+from datasets.transforms import default_transform, augmented_transform, caer_net_transforms
 from engine.evaluator import evaluate, evaluate_per_class
 from engine.trainer import train_one_epoch
 from utils.device_utils import get_device, set_seed_all
@@ -182,23 +182,51 @@ def main() -> None:
             },
         )
 
-        train_transform = augmented_transform(cfg.dataset.image_size) if args.augment else default_transform(cfg.dataset.image_size)
-        val_transform = default_transform(cfg.dataset.image_size)
-
-        ds_train = CAERSTwoStreamDataset(
-            manifest_path=cfg.outputs.manifest_path,
-            dataset_root=cfg.dataset.dataset_root,
-            split="train",
-            image_size=cfg.dataset.image_size,
-            transform=train_transform,
-        )
-        ds_val = CAERSTwoStreamDataset(
-            manifest_path=cfg.outputs.manifest_path,
-            dataset_root=cfg.dataset.dataset_root,
-            split="val",
-            image_size=cfg.dataset.image_size,
-            transform=val_transform,
-        )
+        # Per-method transform setup
+        # CAER-Net and GLAMOR-Net use paper-specific face crop (96x96) + context (224x224)
+        if cfg.method in ("caernet", "glamor_net"):
+            face_size = getattr(cfg.model, "face_size", 96)
+            train_face_t, train_ctx_t = caer_net_transforms(
+                image_size=cfg.dataset.image_size, face_size=face_size, augment=args.augment
+            )
+            val_face_t, val_ctx_t = caer_net_transforms(
+                image_size=cfg.dataset.image_size, face_size=face_size, augment=False
+            )
+            ds_train = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split="train",
+                image_size=cfg.dataset.image_size,
+                face_size=face_size,
+                face_transform=train_face_t,
+                context_transform=train_ctx_t,
+            )
+            ds_val = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split="val",
+                image_size=cfg.dataset.image_size,
+                face_size=face_size,
+                face_transform=val_face_t,
+                context_transform=val_ctx_t,
+            )
+        else:
+            train_transform = augmented_transform(cfg.dataset.image_size) if args.augment else default_transform(cfg.dataset.image_size)
+            val_transform = default_transform(cfg.dataset.image_size)
+            ds_train = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split="train",
+                image_size=cfg.dataset.image_size,
+                transform=train_transform,
+            )
+            ds_val = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split="val",
+                image_size=cfg.dataset.image_size,
+                transform=val_transform,
+            )
 
         loader_train = DataLoader(
             ds_train,
@@ -403,13 +431,24 @@ def main() -> None:
             logger.info("Evaluating on test split (same W&B run)...")
             from engine.evaluator import evaluate_per_class
 
-            ds_test = CAERSTwoStreamDataset(
-                manifest_path=cfg.outputs.manifest_path,
-                dataset_root=cfg.dataset.dataset_root,
-                split="test",
-                image_size=cfg.dataset.image_size,
-                transform=val_transform,
-            )
+            if cfg.method in ("caernet", "glamor_net"):
+                ds_test = CAERSTwoStreamDataset(
+                    manifest_path=cfg.outputs.manifest_path,
+                    dataset_root=cfg.dataset.dataset_root,
+                    split="test",
+                    image_size=cfg.dataset.image_size,
+                    face_size=face_size,
+                    face_transform=val_face_t,
+                    context_transform=val_ctx_t,
+                )
+            else:
+                ds_test = CAERSTwoStreamDataset(
+                    manifest_path=cfg.outputs.manifest_path,
+                    dataset_root=cfg.dataset.dataset_root,
+                    split="test",
+                    image_size=cfg.dataset.image_size,
+                    transform=val_transform,
+                )
             loader_test = DataLoader(
                 ds_test,
                 batch_size=cfg.train.batch_size,

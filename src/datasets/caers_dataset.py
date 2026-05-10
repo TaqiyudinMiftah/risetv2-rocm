@@ -11,7 +11,8 @@ from datasets.transforms import default_transform
 from utils.io_utils import read_jsonl
 
 
-def _apply_face_mask(image: Image.Image, face_bbox: Any) -> Image.Image:
+def _apply_face_mask(image: Image.Image, face_bbox: Any, fill_color: tuple[int, int, int] = (0, 0, 0)) -> Image.Image:
+    """Mask face region in context image. Default fill is black (0,0,0) per paper."""
     if not face_bbox:
         return image.copy()
 
@@ -21,7 +22,7 @@ def _apply_face_mask(image: Image.Image, face_bbox: Any) -> Image.Image:
     x1, y1, x2, y2 = [int(v) for v in face_bbox]
     masked = image.copy()
     draw = ImageDraw.Draw(masked)
-    draw.rectangle([x1, y1, x2, y2], fill=(127, 127, 127))
+    draw.rectangle([x1, y1, x2, y2], fill=fill_color)
     return masked
 
 
@@ -32,11 +33,24 @@ class CAERSTwoStreamDataset(Dataset):
         dataset_root: Path,
         split: str,
         image_size: int,
+        face_size: int | None = None,
         transform: Any = None,
+        face_transform: Any = None,
+        context_transform: Any = None,
     ) -> None:
         self.dataset_root = dataset_root
         self.split = split
-        self.transform = transform if transform is not None else default_transform(image_size)
+        self.image_size = image_size
+        self.face_size = face_size or image_size
+
+        # Fallback to unified transform if per-stream transforms not provided
+        if face_transform is not None and context_transform is not None:
+            self.face_transform = face_transform
+            self.context_transform = context_transform
+        else:
+            t = transform if transform is not None else default_transform(image_size)
+            self.face_transform = t
+            self.context_transform = t
 
         rows = read_jsonl(manifest_path)
         self.rows = [r for r in rows if str(r.get("split")) == split]
@@ -50,6 +64,20 @@ class CAERSTwoStreamDataset(Dataset):
     def __len__(self) -> int:
         return len(self.rows)
 
+    def _crop_face(self, image: Image.Image, face_bbox: Any) -> Image.Image:
+        """Crop face region and resize to face_size."""
+        if not face_bbox or not isinstance(face_bbox, (list, tuple)) or len(face_bbox) != 4:
+            # Fallback: center crop if no bbox
+            w, h = image.size
+            min_dim = min(w, h)
+            left = (w - min_dim) // 2
+            top = (h - min_dim) // 2
+            face_crop = image.crop((left, top, left + min_dim, top + min_dim))
+        else:
+            x1, y1, x2, y2 = [int(v) for v in face_bbox]
+            face_crop = image.crop((x1, y1, x2, y2))
+        return face_crop.resize((self.face_size, self.face_size), Image.BILINEAR)
+
     def __getitem__(self, index: int) -> dict[str, Any]:
         row = self.rows[index]
         rel_path = str(row["image_path"])
@@ -58,10 +86,15 @@ class CAERSTwoStreamDataset(Dataset):
             raise FileNotFoundError(f"Missing image file: {image_path}")
 
         image = Image.open(image_path).convert("RGB")
-        context_image = _apply_face_mask(image, row.get("face_bbox"))
+        face_bbox = row.get("face_bbox")
 
-        face_tensor = self.transform(image)
-        context_tensor = self.transform(context_image)
+        # Face branch: cropped face (paper uses 96x96 for CAER-Net/GLAMOR)
+        face_crop = self._crop_face(image, face_bbox)
+        face_tensor = self.face_transform(face_crop)
+
+        # Context branch: full image with face masked out
+        context_image = _apply_face_mask(image, face_bbox)
+        context_tensor = self.context_transform(context_image)
 
         label_name = str(row["label"])
         label_idx = self.label_to_index[label_name]

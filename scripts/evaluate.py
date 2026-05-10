@@ -17,7 +17,7 @@ if str(SRC_DIR) not in sys.path:
 
 from config.config import load_config
 from datasets.caers_dataset import CAERSTwoStreamDataset
-from datasets.transforms import default_transform
+from datasets.transforms import default_transform, caer_net_transforms
 from engine.evaluator import evaluate, evaluate_per_class
 from utils.device_utils import get_device
 from utils.io_utils import write_json
@@ -169,13 +169,28 @@ def main() -> None:
             },
         )
 
-        ds_test = CAERSTwoStreamDataset(
-            manifest_path=cfg.outputs.manifest_path,
-            dataset_root=cfg.dataset.dataset_root,
-            split=args.split,
-            image_size=cfg.dataset.image_size,
-            transform=default_transform(cfg.dataset.image_size),
-        )
+        if cfg.method in ("caernet", "glamor_net"):
+            face_size = getattr(cfg.model, "face_size", 96)
+            face_t, ctx_t = caer_net_transforms(
+                image_size=cfg.dataset.image_size, face_size=face_size, augment=False
+            )
+            ds_test = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=args.split,
+                image_size=cfg.dataset.image_size,
+                face_size=face_size,
+                face_transform=face_t,
+                context_transform=ctx_t,
+            )
+        else:
+            ds_test = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=args.split,
+                image_size=cfg.dataset.image_size,
+                transform=default_transform(cfg.dataset.image_size),
+            )
         loader_test = DataLoader(
             ds_test,
             batch_size=cfg.train.batch_size,
