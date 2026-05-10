@@ -38,6 +38,14 @@ class TrainConfig:
     seed: int = 42
     save_dir: Path = field(default_factory=lambda: Path("checkpoints"))
     stream_mode: str = "multimodal"  # for backward compat with CAER-Net
+    # Optimizer & scheduler
+    optimizer: str = "adamw"  # adamw, sgd
+    momentum: float = 0.9
+    nesterov: bool = True
+    scheduler: str = "none"  # none, cosine
+    eta_min: float = 1e-6
+    # Training stability
+    grad_clip_norm: float = 0.0  # 0 = disabled, recommended: 1.0 for iterative attention
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +166,12 @@ def _build_train_cfg(raw: dict[str, Any], seed: int) -> TrainConfig:
         seed=seed,
         save_dir=Path(str(raw.get("save_dir", "checkpoints"))),
         stream_mode=str(raw.get("stream_mode", "multimodal")),
+        optimizer=str(raw.get("optimizer", "adamw")),
+        momentum=float(raw.get("momentum", 0.9)),
+        nesterov=bool(raw.get("nesterov", True)),
+        scheduler=str(raw.get("scheduler", "none")),
+        eta_min=float(raw.get("eta_min", 1e-6)),
+        grad_clip_norm=float(raw.get("grad_clip_norm", 0.0)),
     )
 
 

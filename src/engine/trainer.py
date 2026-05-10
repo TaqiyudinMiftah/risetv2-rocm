@@ -17,6 +17,7 @@ def train_one_epoch(
     criterion: nn.Module,
     device: torch.device,
     loss_fn: Any | None = None,
+    grad_clip_norm: float = 0.0,
 ) -> dict[str, float]:
     model.train()
     tracker = MetricTracker()
@@ -34,6 +35,10 @@ def train_one_epoch(
         else:
             loss = criterion(out["logits"], labels)
         loss.backward()
+
+        if grad_clip_norm > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_norm)
+
         optimizer.step()
 
         tracker.update(loss.item(), out["logits"].detach(), labels)

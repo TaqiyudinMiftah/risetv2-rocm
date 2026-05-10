@@ -21,6 +21,10 @@ train:
   device: ""
   save_dir: "checkpoints"
   stream_mode: "multimodal"
+  optimizer: adamw
+  scheduler: cosine
+  eta_min: 1.0e-6
+  grad_clip_norm: 1.0
 
 model:
   backbone: "resnet18"

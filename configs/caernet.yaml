@@ -9,20 +9,26 @@ dataset:
   image_size: 224
 
 model:
-  backbone: resnet18
-  pretrained: true
+  backbone: shallow_cnn  # paper-specific custom CNN (32->64->128->256->256)
+  pretrained: false      # no ImageNet pretraining for shallow CNN
   dropout: 0.5
-  face_size: 96  # face crop size per paper (context stays at image_size)
+  face_size: 96         # face crop size per paper (context stays at image_size)
 
 train:
   batch_size: 32
-  num_epochs: 30
+  num_epochs: 60
   lr: 0.001
   weight_decay: 0.0001
   num_workers: 4
   device: ""  # auto-detect: cuda / rocm / mps / cpu
   stream_mode: multimodal
   save_dir: checkpoints
+  optimizer: sgd
+  momentum: 0.9
+  nesterov: true
+  scheduler: cosine
+  eta_min: 1.0e-6
+  grad_clip_norm: 1.0
 
 outputs:
   manifest_path: artifacts/caers/manifest_caers.jsonl

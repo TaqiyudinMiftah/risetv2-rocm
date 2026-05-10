@@ -167,9 +167,17 @@ def main() -> None:
                 "num_epochs": cfg.train.num_epochs,
                 "lr": cfg.train.lr,
                 "weight_decay": cfg.train.weight_decay,
+                "optimizer": cfg.train.optimizer,
+                "momentum": cfg.train.momentum,
+                "nesterov": cfg.train.nesterov,
+                "scheduler": cfg.train.scheduler,
+                "grad_clip_norm": cfg.train.grad_clip_norm,
                 "stream_mode": cfg.train.stream_mode,
                 "image_size": cfg.dataset.image_size,
                 "val_ratio": cfg.dataset.val_ratio,
+                **({
+                    "face_size": cfg.model.face_size,
+                } if cfg.method in ("caernet", "glamor_net") else {}),
                 **({
                     "num_iterations": cfg.model.num_iterations,
                     "confounder_dim": cfg.model.confounder_dim,
@@ -302,7 +310,28 @@ def main() -> None:
                 logger.info("Confounder dictionary built and saved to %s", confounder_path)
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
+
+        # Optimizer selection
+        if cfg.train.optimizer.lower() == "sgd":
+            optimizer = torch.optim.SGD(
+                model.parameters(),
+                lr=cfg.train.lr,
+                momentum=cfg.train.momentum,
+                nesterov=cfg.train.nesterov,
+                weight_decay=cfg.train.weight_decay,
+            )
+            logger.info("Optimizer: SGD(lr=%.4f, momentum=%.2f, nesterov=%s, wd=%.5f)", cfg.train.lr, cfg.train.momentum, cfg.train.nesterov, cfg.train.weight_decay)
+        else:
+            optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
+            logger.info("Optimizer: AdamW(lr=%.4f, wd=%.5f)", cfg.train.lr, cfg.train.weight_decay)
+
+        # LR scheduler
+        scheduler = None
+        if cfg.train.scheduler.lower() == "cosine":
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=cfg.train.num_epochs, eta_min=cfg.train.eta_min
+            )
+            logger.info("Scheduler: CosineAnnealingLR(T_max=%d, eta_min=%.2e)", cfg.train.num_epochs, cfg.train.eta_min)
 
         # Custom loss function for CD-ICA-Net
         loss_fn = None
@@ -359,7 +388,10 @@ def main() -> None:
 
         for epoch in range(start_epoch, cfg.train.num_epochs):
             logger.info("Epoch %d/%d started", epoch + 1, cfg.train.num_epochs)
-            train_metrics = train_one_epoch(model, loader_train, optimizer, criterion, device, loss_fn=loss_fn)
+            train_metrics = train_one_epoch(
+                model, loader_train, optimizer, criterion, device,
+                loss_fn=loss_fn, grad_clip_norm=cfg.train.grad_clip_norm,
+            )
             val_metrics = evaluate(model, loader_val, criterion, device)
 
             logger.info(
@@ -372,8 +404,13 @@ def main() -> None:
                 val_metrics["acc1"],
             )
 
+            # Step scheduler
+            current_lr = optimizer.param_groups[0]["lr"]
+            if scheduler is not None:
+                scheduler.step()
+
             # Log metrics to W&B
-            wandb.log({
+            log_dict = {
                 "epoch": epoch + 1,
                 "train/loss": train_metrics["loss"],
                 "train/acc1": train_metrics["acc1"],
@@ -381,7 +418,9 @@ def main() -> None:
                 "val/loss": val_metrics["loss"],
                 "val/acc1": val_metrics["acc1"],
                 "val/acc5": val_metrics["acc5"],
-            })
+                "train/lr": current_lr,
+            }
+            wandb.log(log_dict)
 
             history.append({
                 "epoch": epoch + 1,
