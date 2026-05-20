@@ -57,10 +57,12 @@ class TrainConfig:
 
 @dataclass
 class CAERNetConfig:
-    backbone: str = "resnet18"
-    pretrained: bool = True
+    backbone: str = "custom"
+    pretrained: bool = False
     dropout: float = 0.5
     face_size: int = 96  # face crop size per paper
+    face_backbone: str = ""  # per-branch override; empty = use backbone
+    context_backbone: str = ""  # per-branch override; empty = use backbone
 
 
 @dataclass
@@ -111,6 +113,17 @@ class CDICANetConfig:
     alpha_ica: float = 0.5           # Weight for L_ica
     beta_reg: float = 0.1            # Weight for L_reg
     flood_level: float = 0.05        # Flooding level for L_ce
+
+
+@dataclass
+class AGCDNetConfig:
+    convnext_variant: str = "tiny"   # ConvNeXt variant: tiny, small, base
+    pretrained: bool = True
+    use_stn: bool = True             # Use Spatial Transformer Network
+    se_reduction: int = 16           # SE block reduction ratio
+    num_heads: int = 8               # MHSA number of heads
+    dropout: float = 0.5
+    label_smoothing: float = 0.2     # Label smoothing epsilon (paper uses 0.2)
 
 
 # ---------------------------------------------------------------------------
@@ -226,10 +239,21 @@ def load_config(config_path: str | Path) -> AppConfig:
     model_cfg: Any = None
     if method == "caernet":
         model_cfg = CAERNetConfig(
-            backbone=str(model_raw.get("backbone", "resnet18")),
-            pretrained=bool(model_raw.get("pretrained", True)),
+            backbone=str(model_raw.get("backbone", "custom")),
+            pretrained=bool(model_raw.get("pretrained", False)),
             dropout=float(model_raw.get("dropout", 0.5)),
             face_size=int(model_raw.get("face_size", 96)),
+            face_backbone=str(model_raw.get("face_backbone", "")),
+            context_backbone=str(model_raw.get("context_backbone", "")),
+        )
+    elif method == "caernet_official":
+        model_cfg = CAERNetConfig(
+            backbone="custom",
+            pretrained=False,
+            dropout=float(model_raw.get("dropout", 0.5)),
+            face_size=96,
+            face_backbone="",
+            context_backbone="",
         )
     elif method == "zhou_cross_attention":
         model_cfg = ZhouCrossAttentionConfig(
@@ -276,6 +300,16 @@ def load_config(config_path: str | Path) -> AppConfig:
             alpha_ica=float(model_raw.get("alpha_ica", 0.5)),
             beta_reg=float(model_raw.get("beta_reg", 0.1)),
             flood_level=float(model_raw.get("flood_level", 0.05)),
+        )
+    elif method == "agcd_net":
+        model_cfg = AGCDNetConfig(
+            convnext_variant=str(model_raw.get("convnext_variant", "tiny")),
+            pretrained=bool(model_raw.get("pretrained", True)),
+            use_stn=bool(model_raw.get("use_stn", True)),
+            se_reduction=int(model_raw.get("se_reduction", 16)),
+            num_heads=int(model_raw.get("num_heads", 8)),
+            dropout=float(model_raw.get("dropout", 0.5)),
+            label_smoothing=float(model_raw.get("label_smoothing", 0.2)),
         )
     else:
         raise ValueError(f"Unsupported method: {method}")

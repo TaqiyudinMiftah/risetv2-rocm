@@ -1,0 +1,44 @@
+# caernet.yaml
+# CAER-Net-S training configuration
+# Lee et al., ICCV 2019  –  static (2-D) model on CAER-S dataset
+#
+# Key paper parameters:
+#   - Two-stream: face-cropped + face-hidden context
+#   - Context attention (unsupervised, spatial softmax)
+#   - Adaptive fusion (4 × 1×1 Conv weight inference + 2 × 1×1 Conv classifier)
+#   - Cross-entropy loss, batch_size=32, dropout=0.5
+#   - Input: 224×224 (face & context both)
+#   - From-scratch LR: 5e-3, drop ×0.1 every 4 epochs
+#   - Fine-tuned LR:   1e-4  (paper Table 4, fine-tuned baseline models)
+#     → We use 1e-3 with warmup+cosine for faster convergence.
+
+method: caernet
+seed: 42
+
+dataset:
+  dataset_root: /home/taqiyudinmiftah/risetv2/caer_dataset/CAER-S
+  image_extensions: [".png", ".jpg", ".jpeg", ".bmp", ".webp"]
+  create_val_split: true      # carve 10% of train as validation
+  val_ratio: 0.10
+  image_size: 224             # paper: 224×224 for CAER-Net-S
+
+model:
+  backbone: resnet18          # paper ablation uses pretrained ImageNet backbones
+  pretrained: true            # fine-tune from ImageNet (matches paper best config)
+  dropout: 0.5                # paper: 0.5 between 1×1 conv layers
+
+train:
+  batch_size: 32              # paper: batch_size=32
+  num_epochs: 30
+  # Fine-tuning LR (paper uses 1e-4 for fine-tuned baselines;
+  # we use 1e-3 + warmup+cosine for CAER-Net-S to reach ~73.5% faster)
+  lr: 0.001
+  weight_decay: 0.0001
+  num_workers: 4
+  device: ""                  # auto-detect: cuda > mps > cpu
+  stream_mode: multimodal     # multimodal | face | context
+  save_dir: checkpoints
+
+outputs:
+  manifest_path: artifacts/caers/manifest_caers.jsonl
+  diagnostics_path: artifacts/caers/diagnostics_caers.json

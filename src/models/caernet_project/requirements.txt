@@ -1,0 +1,9 @@
+# CAER-Net requirements
+# Python >= 3.9
+
+torch>=2.0.0
+torchvision>=0.15.0
+opencv-python>=4.8.0       # provides Haar cascade + cv2.data.haarcascades
+Pillow>=9.0.0
+numpy>=1.23.0
+pyyaml>=6.0

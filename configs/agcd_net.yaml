@@ -1,0 +1,38 @@
+method: agcd_net
+seed: 42
+
+dataset:
+  dataset_root: ~/datasets/CAER-S
+  image_extensions: [".jpg", ".png", ".jpeg"]
+  create_val_split: true
+  val_ratio: 0.1
+  image_size: 224
+
+outputs:
+  manifest_path: artifacts/manifest.jsonl
+  diagnostics_path: artifacts/diagnostics.json
+
+train:
+  batch_size: 128
+  num_epochs: 100
+  lr: 1.0e-5
+  weight_decay: 1.0e-4
+  num_workers: 4
+  device: ""
+  optimizer: adamw
+  scheduler: cosine_warm_restarts
+  # CosineAnnealingWarmRestarts params per paper
+  eta_min: 1.0e-7
+  # Note: T_0=128, T_mult=2 as per AGCD-Net paper
+  # These are handled in the training script
+  grad_clip_norm: 0.0
+
+model:
+  convnext_variant: "tiny"
+  pretrained: true
+  use_stn: true
+  se_reduction: 16
+  num_heads: 8
+  dropout: 0.5
+  # Label smoothing epsilon (paper uses 0.2)
+  label_smoothing: 0.2

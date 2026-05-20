@@ -12,6 +12,14 @@ class ManifestBuildResult:
     diagnostics: dict[str, object]
 
 
+def _normalize_label(label: str) -> str:
+    """Normalize label names to match paper's 7 emotion classes."""
+    label_map = {
+        "Anger": "Angry",   # CAER-S sometimes has "Anger" instead of "Angry"
+    }
+    return label_map.get(label, label)
+
+
 def _collect_split_rows(
     dataset_root: Path,
     split_name: str,
@@ -25,7 +33,7 @@ def _collect_split_rows(
     for class_dir in sorted(split_dir.iterdir()):
         if not class_dir.is_dir():
             continue
-        label = class_dir.name
+        label = _normalize_label(class_dir.name)
 
         for image_path in sorted(class_dir.rglob("*")):
             if not image_path.is_file():

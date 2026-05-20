@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import torch
 import torch.nn as nn
 from torchvision import models
 from torchvision.models.feature_extraction import create_feature_extractor
@@ -42,11 +45,35 @@ class ShallowCNNEncoder(nn.Module):
         return {"feat": feat}
 
 
+def _load_places365_resnet18(weights_path: str | Path) -> nn.Module:
+    """Load ResNet-18 pretrained on Places365."""
+    net = models.resnet18(weights=None)
+    ckpt = torch.load(weights_path, map_location="cpu")
+    state_dict = ckpt["state_dict"]
+    # Remove 'module.' prefix from DataParallel
+    state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+    # Remove fc layer weights (different num_classes: 365 vs 1000)
+    state_dict = {k: v for k, v in state_dict.items() if not k.startswith("fc.")}
+    net.load_state_dict(state_dict, strict=False)
+    return net
+
+
 def _make_encoder(backbone: str = "resnet18", pretrained: bool = False) -> tuple[nn.Module, int]:
     """Create a CNN feature encoder that returns spatial feature maps."""
     if backbone == "resnet18":
         weights = models.ResNet18_Weights.DEFAULT if pretrained else None
         net = models.resnet18(weights=weights)
+        encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
+        dim = 512
+        return encoder, dim
+    if backbone == "resnet18_places365":
+        weights_path = Path("checkpoints/places365/resnet18_places365.pth.tar")
+        if not weights_path.exists():
+            raise FileNotFoundError(
+                f"Places365 weights not found: {weights_path}. "
+                "Download from: http://places2.csail.mit.edu/models_places365/resnet18_places365.pth.tar"
+            )
+        net = _load_places365_resnet18(weights_path)
         encoder = create_feature_extractor(net, return_nodes={"layer4": "feat"})
         dim = 512
         return encoder, dim

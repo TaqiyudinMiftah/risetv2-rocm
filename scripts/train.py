@@ -39,15 +39,24 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
         if cfg.train.stream_mode == "multimodal":
             return CAERNet(
                 num_classes=num_classes,
-                backbone=model_cfg.backbone,
-                pretrained=model_cfg.pretrained,
                 dropout=model_cfg.dropout,
+                backbone=getattr(model_cfg, "backbone", "custom"),
+                pretrained=getattr(model_cfg, "pretrained", False),
+                face_backbone=getattr(model_cfg, "face_backbone", None) or None,
+                context_backbone=getattr(model_cfg, "context_backbone", None) or None,
             )
         return SingleStreamNet(
             num_classes=num_classes,
             stream=cfg.train.stream_mode,
-            backbone=model_cfg.backbone,
-            pretrained=model_cfg.pretrained,
+            dropout=model_cfg.dropout,
+            backbone=getattr(model_cfg, "backbone", "custom"),
+            pretrained=getattr(model_cfg, "pretrained", False),
+        )
+
+    if method == "caernet_official":
+        from models.caernet_official import CAERNetOfficial
+        return CAERNetOfficial(
+            num_classes=num_classes,
             dropout=model_cfg.dropout,
         )
 
@@ -107,6 +116,19 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
             df_hidden_dim=model_cfg.df_hidden_dim,
         )
 
+    if method == "agcd_net":
+        from models.agcd_net.model import AGCDNet
+
+        return AGCDNet(
+            num_classes=num_classes,
+            convnext_variant=model_cfg.convnext_variant,
+            pretrained=model_cfg.pretrained,
+            use_stn=model_cfg.use_stn,
+            se_reduction=model_cfg.se_reduction,
+            num_heads=model_cfg.num_heads,
+            dropout=model_cfg.dropout,
+        )
+
     raise ValueError(f"Unsupported method: {method}")
 
 
@@ -151,7 +173,8 @@ def main() -> None:
 
         # Initialize W&B
         wandb_mode = "offline" if args.wandb_offline else "online"
-        run_name = args.wandb_run_name or f"{cfg.method}-{cfg.model.backbone}"
+        _backbone = getattr(cfg.model, "backbone", "shallow_cnn")
+        run_name = args.wandb_run_name or f"{cfg.method}-{_backbone}"
         run = wandb.init(
             project=args.wandb_project,
             entity=args.wandb_entity or None,
@@ -160,8 +183,8 @@ def main() -> None:
             config={
                 "method": cfg.method,
                 "seed": cfg.seed,
-                "backbone": cfg.model.backbone,
-                "pretrained": cfg.model.pretrained,
+                "backbone": _backbone,
+                "pretrained": getattr(cfg.model, "pretrained", False),
                 "dropout": cfg.model.dropout,
                 "batch_size": cfg.train.batch_size,
                 "num_epochs": cfg.train.num_epochs,
@@ -190,9 +213,18 @@ def main() -> None:
             },
         )
 
+        # Determine val split source (allow using test as val for paper reproduction)
+        val_split = getattr(cfg.dataset, "val_source", "val")
+        logger.info("Using '%s' split for validation", val_split)
+
+        # If create_val_split is false, use both train+val for training
+        train_splits = ["train", "val"] if not getattr(cfg.dataset, "create_val_split", True) else "train"
+        logger.info("Training on splits: %s", train_splits)
+
         # Per-method transform setup
-        # CAER-Net and GLAMOR-Net use paper-specific face crop (96x96) + context (224x224)
-        if cfg.method in ("caernet", "glamor_net"):
+        # GLAMOR-Net uses paper-specific face crop (96x96) + context (224x224)
+        # CAER-Net-S uses 224x224 for BOTH face and context (paper spec)
+        if cfg.method == "glamor_net":
             face_size = getattr(cfg.model, "face_size", 96)
             train_face_t, train_ctx_t = caer_net_transforms(
                 image_size=cfg.dataset.image_size, face_size=face_size, augment=args.augment
@@ -203,7 +235,7 @@ def main() -> None:
             ds_train = CAERSTwoStreamDataset(
                 manifest_path=cfg.outputs.manifest_path,
                 dataset_root=cfg.dataset.dataset_root,
-                split="train",
+                split=train_splits,
                 image_size=cfg.dataset.image_size,
                 face_size=face_size,
                 face_transform=train_face_t,
@@ -212,28 +244,77 @@ def main() -> None:
             ds_val = CAERSTwoStreamDataset(
                 manifest_path=cfg.outputs.manifest_path,
                 dataset_root=cfg.dataset.dataset_root,
-                split="val",
+                split=val_split,
                 image_size=cfg.dataset.image_size,
                 face_size=face_size,
                 face_transform=val_face_t,
                 context_transform=val_ctx_t,
             )
-        else:
-            train_transform = augmented_transform(cfg.dataset.image_size) if args.augment else default_transform(cfg.dataset.image_size)
-            val_transform = default_transform(cfg.dataset.image_size)
+        elif cfg.method == "caernet":
+            # CAER-Net-S: both streams 224x224 with synchronized augmentation
+            if args.augment:
+                train_t = augmented_transform(cfg.dataset.image_size, flip=False)
+            else:
+                train_t = default_transform(cfg.dataset.image_size)
+            val_t = default_transform(cfg.dataset.image_size)
             ds_train = CAERSTwoStreamDataset(
                 manifest_path=cfg.outputs.manifest_path,
                 dataset_root=cfg.dataset.dataset_root,
-                split="train",
+                split=train_splits,
                 image_size=cfg.dataset.image_size,
-                transform=train_transform,
+                transform=train_t,
+                synchronized_flip=args.augment,
             )
             ds_val = CAERSTwoStreamDataset(
                 manifest_path=cfg.outputs.manifest_path,
                 dataset_root=cfg.dataset.dataset_root,
-                split="val",
+                split=val_split,
+                image_size=cfg.dataset.image_size,
+                transform=val_t,
+                synchronized_flip=False,
+            )
+        elif cfg.method == "caernet_official":
+            # Official CAER-Net from ndkhanh360/CAER
+            # Face: 96x96, Context: 112x112 (from 128x171)
+            from datasets.transforms import caer_official_transforms
+            train_face_t, train_ctx_t = caer_official_transforms(train=True)
+            val_face_t, val_ctx_t = caer_official_transforms(train=False)
+            ds_train = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=train_splits,
+                image_size=cfg.dataset.image_size,
+                face_size=96,
+                face_transform=train_face_t,
+                context_transform=train_ctx_t,
+            )
+            ds_val = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=val_split,
+                image_size=cfg.dataset.image_size,
+                face_size=96,
+                face_transform=val_face_t,
+                context_transform=val_ctx_t,
+            )
+        else:
+            train_transform = augmented_transform(cfg.dataset.image_size, flip=False) if args.augment else default_transform(cfg.dataset.image_size)
+            val_transform = default_transform(cfg.dataset.image_size)
+            ds_train = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=train_splits,
+                image_size=cfg.dataset.image_size,
+                transform=train_transform,
+                synchronized_flip=args.augment,
+            )
+            ds_val = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=val_split,
                 image_size=cfg.dataset.image_size,
                 transform=val_transform,
+                synchronized_flip=False,
             )
 
         loader_train = DataLoader(
@@ -253,7 +334,8 @@ def main() -> None:
 
         num_classes = len(ds_train.label_to_index)
         model = build_model(num_classes, cfg).to(device)
-        logger.info("Model built: method=%s backbone=%s classes=%d", cfg.method, cfg.model.backbone, num_classes)
+        _backbone = getattr(cfg.model, "backbone", "shallow_cnn")
+        logger.info("Model built: method=%s backbone=%s classes=%d", cfg.method, _backbone, num_classes)
 
         # For Yang CCIM: build confounder dictionary if not already set
         if cfg.method == "yang_ccim":
@@ -334,6 +416,14 @@ def main() -> None:
                 optimizer, T_max=cfg.train.num_epochs, eta_min=cfg.train.eta_min
             )
             logger.info("Scheduler: CosineAnnealingLR(T_max=%d, eta_min=%.2e)", cfg.train.num_epochs, cfg.train.eta_min)
+        elif cfg.train.scheduler.lower() == "cosine_warm_restarts":
+            # AGCD-Net paper: T_0=128, T_mult=2
+            t0 = getattr(cfg.train, "t_0", 128)
+            t_mult = getattr(cfg.train, "t_mult", 2)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                optimizer, T_0=t0, T_mult=t_mult, eta_min=cfg.train.eta_min
+            )
+            logger.info("Scheduler: CosineAnnealingWarmRestarts(T_0=%d, T_mult=%d, eta_min=%.2e)", t0, t_mult, cfg.train.eta_min)
         elif cfg.train.scheduler.lower() == "step":
             scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 optimizer, milestones=cfg.train.step_milestones, gamma=cfg.train.step_gamma
@@ -374,6 +464,29 @@ def main() -> None:
                 alpha_ica, beta_reg, flood_level,
             )
 
+        # Custom loss function for AGCD-Net
+        if cfg.method == "agcd_net":
+            label_smoothing = getattr(cfg.model, "label_smoothing", 0.2)
+
+            def _agcd_loss_fn(out: dict[str, Any], labels: torch.Tensor) -> torch.Tensor:
+                # Cross-entropy with label smoothing
+                ce = F.cross_entropy(out["logits"], labels, label_smoothing=label_smoothing)
+
+                # Attention loss: L_att = mean(|h_face| + |h_context|)
+                loss_att = torch.tensor(0.0, device=ce.device)
+                if "h_face" in out and "h_context" in out:
+                    h_face = out["h_face"]
+                    h_context = out["h_context"]
+                    loss_att = (h_face.abs().mean() + h_context.abs().mean())
+
+                return ce + loss_att
+
+            loss_fn = _agcd_loss_fn
+            logger.info(
+                "AGCD-Net custom loss | label_smoothing=%.2f attention_loss=enabled",
+                label_smoothing,
+            )
+
         # Log model architecture
         wandb.watch(model, log="all", log_freq=100)
 
@@ -392,6 +505,8 @@ def main() -> None:
             wandb.run.summary["resumed_best_val_acc"] = best_val_acc
 
         ensure_parent_dir(cfg.train.save_dir / "placeholder")
+
+        epochs_without_improvement = 0
 
         for epoch in range(start_epoch, cfg.train.num_epochs):
             logger.info("Epoch %d/%d started", epoch + 1, cfg.train.num_epochs)
@@ -461,6 +576,20 @@ def main() -> None:
                 artifact.add_file(str(ckpt_path))
                 wandb.log_artifact(artifact, aliases=["best"])
 
+            # Early stopping check
+            patience = getattr(cfg.train, "early_stopping_patience", 0)
+            if patience > 0:
+                if val_metrics["acc1"] > best_val_acc:
+                    epochs_without_improvement = 0
+                else:
+                    epochs_without_improvement += 1
+                    logger.info("No improvement for %d/%d epochs", epochs_without_improvement, patience)
+                    if epochs_without_improvement >= patience:
+                        logger.info("Early stopping triggered after %d epochs without improvement", patience)
+                        wandb.run.summary["early_stopped"] = True
+                        wandb.run.summary["early_stopped_epoch"] = epoch + 1
+                        break
+
         history_path = cfg.train.save_dir / "history.json"
         write_json(history_path, {"history": history, "best_val_acc": best_val_acc})
         logger.info("Training complete. History saved to %s", history_path)
@@ -478,6 +607,10 @@ def main() -> None:
             from engine.evaluator import evaluate_per_class
 
             if cfg.method in ("caernet", "glamor_net"):
+                face_size = getattr(cfg.model, "face_size", cfg.dataset.image_size)
+                val_face_t, val_ctx_t = caer_net_transforms(
+                    image_size=cfg.dataset.image_size, face_size=face_size, augment=False
+                )
                 ds_test = CAERSTwoStreamDataset(
                     manifest_path=cfg.outputs.manifest_path,
                     dataset_root=cfg.dataset.dataset_root,

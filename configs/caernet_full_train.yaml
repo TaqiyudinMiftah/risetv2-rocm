@@ -1,0 +1,39 @@
+method: caernet
+seed: 42
+
+dataset:
+  dataset_root: /home/taqiyudinmiftah/risetv2/caer_dataset/CAER-S
+  image_extensions: [".png", ".jpg", ".jpeg", ".bmp", ".webp"]
+  create_val_split: false       # Use ALL train data for training (no val split)
+  val_ratio: 0.01               # Small ratio to pass validation (ignored when create_val_split=false)
+  val_source: "test"             # Use test set as validation (paper reproduction)
+  image_size: 224             
+
+model:
+  backbone: resnet18
+  pretrained: true
+  face_backbone: ""           
+  context_backbone: resnet18_places365  
+  dropout: 0.5
+
+train:
+  batch_size: 32
+  num_epochs: 60              
+  lr: 0.001                   
+  weight_decay: 0.0001
+  num_workers: 4
+  device: ""
+  stream_mode: multimodal
+  save_dir: checkpoints
+  optimizer: sgd
+  momentum: 0.9
+  nesterov: true
+  scheduler: step
+  step_milestones: [20, 40]   
+  step_gamma: 0.1
+  grad_clip_norm: 5.0
+  early_stopping_patience: 10  # Berhenti jika val acc tidak meningkat selama 10 epoch
+
+outputs:
+  manifest_path: artifacts/caers/manifest_caers_mtcnn.jsonl
+  diagnostics_path: artifacts/caers/diagnostics.json

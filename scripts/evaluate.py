@@ -34,15 +34,24 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
         if cfg.train.stream_mode == "multimodal":
             return CAERNet(
                 num_classes=num_classes,
-                backbone=model_cfg.backbone,
-                pretrained=model_cfg.pretrained,
                 dropout=model_cfg.dropout,
+                backbone=getattr(model_cfg, "backbone", "custom"),
+                pretrained=getattr(model_cfg, "pretrained", False),
+                face_backbone=getattr(model_cfg, "face_backbone", None) or None,
+                context_backbone=getattr(model_cfg, "context_backbone", None) or None,
             )
         return SingleStreamNet(
             num_classes=num_classes,
             stream=cfg.train.stream_mode,
-            backbone=model_cfg.backbone,
-            pretrained=model_cfg.pretrained,
+            dropout=model_cfg.dropout,
+            backbone=getattr(model_cfg, "backbone", "custom"),
+            pretrained=getattr(model_cfg, "pretrained", False),
+        )
+
+    if method == "caernet_official":
+        from models.caernet_official import CAERNetOfficial
+        return CAERNetOfficial(
+            num_classes=num_classes,
             dropout=model_cfg.dropout,
         )
 
@@ -102,6 +111,19 @@ def build_model(num_classes: int, cfg: object) -> nn.Module:
             df_hidden_dim=model_cfg.df_hidden_dim,
         )
 
+    if method == "agcd_net":
+        from models.agcd_net.model import AGCDNet
+
+        return AGCDNet(
+            num_classes=num_classes,
+            convnext_variant=model_cfg.convnext_variant,
+            pretrained=model_cfg.pretrained,
+            use_stn=model_cfg.use_stn,
+            se_reduction=model_cfg.se_reduction,
+            num_heads=model_cfg.num_heads,
+            dropout=model_cfg.dropout,
+        )
+
     raise ValueError(f"Unsupported method: {method}")
 
 
@@ -143,7 +165,8 @@ def main() -> None:
 
         # Initialize W&B
         wandb_mode = "offline" if args.wandb_offline else "online"
-        run_name = args.wandb_run_name or (f"eval-{cfg.method}-{cfg.model.backbone}" if not args.resume_run_id else None)
+        _backbone = getattr(cfg.model, "backbone", "shallow_cnn")
+        run_name = args.wandb_run_name or (f"eval-{cfg.method}-{_backbone}" if not args.resume_run_id else None)
         init_kwargs = dict(
             project=args.wandb_project,
             entity=args.wandb_entity or None,
@@ -160,8 +183,8 @@ def main() -> None:
                 "method": cfg.method,
                 "eval_split": args.split,
                 "checkpoint": args.checkpoint,
-                "backbone": cfg.model.backbone,
-                "pretrained": cfg.model.pretrained,
+                "backbone": _backbone,
+                "pretrained": getattr(cfg.model, "pretrained", False),
                 "dropout": cfg.model.dropout,
                 "batch_size": cfg.train.batch_size,
                 "stream_mode": cfg.train.stream_mode,
@@ -169,7 +192,7 @@ def main() -> None:
             },
         )
 
-        if cfg.method in ("caernet", "glamor_net"):
+        if cfg.method == "glamor_net":
             face_size = getattr(cfg.model, "face_size", 96)
             face_t, ctx_t = caer_net_transforms(
                 image_size=cfg.dataset.image_size, face_size=face_size, augment=False
@@ -180,6 +203,28 @@ def main() -> None:
                 split=args.split,
                 image_size=cfg.dataset.image_size,
                 face_size=face_size,
+                face_transform=face_t,
+                context_transform=ctx_t,
+            )
+        elif cfg.method == "caernet":
+            # CAER-Net: both streams same size with synchronized augmentation
+            ds_test = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=args.split,
+                image_size=cfg.dataset.image_size,
+                transform=default_transform(cfg.dataset.image_size),
+                synchronized_flip=False,
+            )
+        elif cfg.method == "caernet_official":
+            from datasets.transforms import caer_official_transforms
+            face_t, ctx_t = caer_official_transforms(train=False)
+            ds_test = CAERSTwoStreamDataset(
+                manifest_path=cfg.outputs.manifest_path,
+                dataset_root=cfg.dataset.dataset_root,
+                split=args.split,
+                image_size=cfg.dataset.image_size,
+                face_size=96,
                 face_transform=face_t,
                 context_transform=ctx_t,
             )
@@ -201,7 +246,8 @@ def main() -> None:
 
         num_classes = len(ds_test.label_to_index)
         model = build_model(num_classes, cfg).to(device)
-        logger.info("Model built: method=%s backbone=%s classes=%d", cfg.method, cfg.model.backbone, num_classes)
+        _backbone = getattr(cfg.model, "backbone", "shallow_cnn")
+        logger.info("Model built: method=%s backbone=%s classes=%d", cfg.method, _backbone, num_classes)
 
         # For Yang CCIM: load confounder dictionary
         if cfg.method == "yang_ccim":
@@ -217,8 +263,8 @@ def main() -> None:
                 conf_dict, conf_prior = build_confounder_for_dataset(
                     manifest_path=cfg.outputs.manifest_path,
                     dataset_root=cfg.dataset.dataset_root,
-                    backbone=cfg.model.backbone,
-                    pretrained=cfg.model.pretrained,
+                    backbone=_backbone,
+                    pretrained=getattr(cfg.model, "pretrained", False),
                     image_size=cfg.dataset.image_size,
                     num_confounders=cfg.model.num_confounders,
                     batch_size=cfg.train.batch_size,
@@ -244,8 +290,8 @@ def main() -> None:
                 conf_dict, conf_prior = build_confounder_for_dataset(
                     manifest_path=cfg.outputs.manifest_path,
                     dataset_root=cfg.dataset.dataset_root,
-                    backbone=cfg.model.backbone,
-                    pretrained=cfg.model.pretrained,
+                    backbone=_backbone,
+                    pretrained=getattr(cfg.model, "pretrained", False),
                     image_size=cfg.dataset.image_size,
                     num_confounders=cfg.model.num_confounders,
                     batch_size=cfg.train.batch_size,

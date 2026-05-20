@@ -73,7 +73,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Run training or evaluation for ALL available models sequentially."
             echo ""
-            echo "Models executed: caernet, zhou_cross_attention, yang_ccim, glamor_net, cd_ica_net"
+            echo "Models executed: caernet, zhou_cross_attention, yang_ccim, glamor_net, cd_ica_net, agcd_net"
             echo ""
             echo "Options:"
             echo "  --mode MODE           Mode to run: train or evaluate (default: train)"
@@ -110,11 +110,12 @@ fi
 
 # List of configs (order matters)
 CONFIGS=(
-    "${CONFIGS_DIR}/caernet.yaml"
+    # "${CONFIGS_DIR}/caernet.yaml"
     "${CONFIGS_DIR}/zhou_cross_attention.yaml"
     "${CONFIGS_DIR}/yang_ccim.yaml"
     "${CONFIGS_DIR}/glamor_net.yaml"
     "${CONFIGS_DIR}/cd_ica_net.yaml"
+    "${CONFIGS_DIR}/agcd_net.yaml"
 )
 
 echo "============================================================"

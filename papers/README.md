@@ -4,7 +4,7 @@ This folder contains key papers for the CD-ICA-Net research project.
 
 ---
 
-## Baseline Papers (Reproduced in this repo)
+## Baseline Papers (Reproduced or Referenced)
 
 ### 1. CAER-Net (ICCV 2019)
 **File**: `Lee_CAER-Net_ICCV2019.pdf`
@@ -40,44 +40,72 @@ This folder contains key papers for the CD-ICA-Net research project.
 
 ---
 
-## Competing Method (2025 — Very Recent!)
+## Competing Methods (2024-2025 — Very Recent!)
 
-### 5. AGCD-Net (ICIAP 2025)
+### 5. DSCT (arXiv 2024)
+**File**: `Li_DSCT_arxiv2024.pdf`
+- Authors: Li, Wang, Zhao, Mao, Wang, Zheng, Peng, Li
+- Title: "Two in One Go: Single-stage Emotion Recognition with Decoupled Subject-context Transformer"
+- Venue: arXiv 2024
+- CAER-S Accuracy: **+3.39%** over two-stage baselines
+- Key: Single-stage approach using Transformer (DSCT), decouple-then-fuse strategy
+- **Note**: Different paradigm from CNN-based methods; uses DETR-style detection + classification
+
+### 6. EmoCommonSense / VLLM (IJCNN 2025)
+**File**: `Xenos_EmoCommonSense_IJCNN2025.pdf`
+- Authors: Xenos, Foteinopoulou, Ntinou, Patras, Tzimiropoulos
+- Title: "VLLMs Provide Better Context for Emotion Understanding Through Common Sense Reasoning"
+- Venue: IJCNN 2025
+- CAER-S Accuracy: **SOTA** (exact number TBD)
+- Key: Vision-Language Models (VLLMs) + common sense reasoning, two-stage (caption generation + classification)
+- **Note**: Uses LLM-generated captions as additional input; very different architecture
+
+### 7. AGCD-Net (ICIAP 2025)
 **File**: `AGCD-Net_ICIAP2025.pdf`
 - Authors: Varsha Devi, Amine Bohi, Pardeep Kumar
 - Title: "AGCD-Net: Attention Guided Context Debiasing Network for Emotion Recognition"
 - Venue: ICIAP 2025 (July 2025)
 - CAER-S Accuracy: Claims **SOTA** (exact number TBD from paper)
 - Key: ConvNeXt + Attention Guided Causal Intervention (AG-CIM), hybrid encoder
-- **WARNING**: This is a direct competitor published July 2025! Must be acknowledged in our paper.
+- **WARNING**: Direct competitor combining attention + causal debiasing. Must be acknowledged.
 
 ---
 
 ## How to Use These Papers
 
 ### For Literature Review
-Read in order: CAER-Net → GLAMOR-Net → CAHFW-Net → Yang CCIM → AGCD-Net
+Read in order:
+1. CAER-Net (foundation)
+2. GLAMOR-Net (attention introduction)
+3. CAHFW-Net (cross-attention + fusion)
+4. Yang CCIM (causal debiasing)
+5. DSCT (Transformer approach)
+6. AGCD-Net (recent attention+causal)
+7. EmoCommonSense (VLLM approach)
 
 ### For Ablation Study Design
-Compare components:
-- CAER-Net: basic two-stream
-- GLAMOR-Net: + global-local attention
-- CAHFW-Net: + cross-attention + recalibration
-- Yang CCIM: + causal debiasing
-- AGCD-Net: + attention-guided causal intervention
-- CD-ICA-Net (ours): + iterative bidirectional cross-attention + integrated causal debiasing
+Compare components across all methods:
+
+| Component | CAER-Net | GLAMOR | CAHFW | Yang CCIM | DSCT | AGCD-Net | CD-ICA-Net (Ours) |
+|-----------|----------|--------|-------|-----------|------|----------|-------------------|
+| Backbone | CNN | CNN | CNN | ResNet | Transformer | ConvNeXt | Custom CNN/ResNet |
+| Face-Context | Independent | F→C | F↔C (2 pass) | Raw fusion | Decouple-then-fuse | F→C (single) | **F↔C (N iter)** |
+| Attention | Context only | GLA | CA+ER | SE-like | Cross-attn | AG-CIM | **Iterative CA** |
+| Causal | ✗ | ✗ | ✗ | ✓ (plug-in) | ✗ | ✓ (integrated) | **✓ (after CA)** |
+| Fusion | Adaptive | Adaptive | AA+DF | Concat+Proj | Decoder | Hierarchical | **Hybrid AA+DF** |
 
 ### For Paper Writing
-Cite all 5 baselines. Position CD-ICA-Net as solving the gap that all 5 baselines still have:
-- No iterative bidirectional interaction (AGCD-Net: single-pass)
-- No integrated debiasing after cross-attention (all baselines)
+Cite all 7 baselines. Position CD-ICA-Net as solving the gap:
+- **No iterative bidirectional interaction** (DSCT: decouple-then-fuse; AGCD-Net: single-pass)
+- **No integrated debiasing after cross-attention** (Yang: plug-in on raw features; AGCD-Net: after encoder)
+- **No end-to-end iterative causal framework** (all baselines lack this combination)
 
 ---
 
-## Additional Papers to Download (Recommended)
+## Additional Papers to Find (Future Work)
 
-- [ ] EmotiCon (base model for Yang CCIM) — if available
-- [ ] Survey on Context-Aware Emotion Recognition (2024/2025)
-- [ ] Any other CAER-S SOTA from 2024-2025
+- [ ] EmotiCon (base model for Yang CCIM) — if publicly available
+- [ ] Comprehensive survey on CAER (2024-2025)
+- [ ] Any other CAER-S SOTA from 2024-2025 not yet covered
 
 Use `./download_papers.sh` to batch download if more URLs are added.

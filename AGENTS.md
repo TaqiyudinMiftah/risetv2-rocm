@@ -7,13 +7,14 @@
 
 See `docs/` for full research documentation. Read in this order:
 1. `docs/README.md` — project overview and quick summary
-2. `docs/01_literature_review.md` — 4 baseline papers (CAER-Net, CCIM, GLAMOR-Net, CAHFW-Net)
+2. `docs/01_literature_review.md` — 7 papers (4 baselines + 3 recent competitors: AGCD-Net, DSCT, EmoCommonSense)
 3. `docs/02_research_gap.md` — gap analysis justifying CD-ICA-Net
 4. `docs/03_architecture.md` — full architecture specification (5 stages)
 5. `docs/04_mathematics.md` — complete mathematical formulations
 6. `docs/05_training_strategy.md` — 3-phase training strategy, datasets, metrics
 7. `docs/06_abstract.md` — conference abstract
 8. `docs/07_novelty.md` — novelty claims vs prior work
+9. `docs/10_baseline_strategy.md` — baseline selection & recent competitor strategy
 
 ### Core Goal
 Implement **CD-ICA-Net**, a new architecture that simultaneously solves:
@@ -27,6 +28,7 @@ This repo contains **baseline reproductions** plus the **proposed method**:
 - `zhou_cross_attention` — CAHFW-Net (IJERPH 2023)
 - `yang_ccim` — Context De-confounded Emotion Recognition (CVPR 2023)
 - `glamor_net` — GLAMOR-Net (Neural Computing and Applications, 2022)
+- `agcd_net` — AGCD-Net (ICIAP 2025) ✅ Reproduction implemented
 - `cd_ica_net` — **CD-ICA-Net (Proposed)** ✅ Implemented
 
 ## Architecture to Implement (5 Stages)
@@ -71,6 +73,7 @@ See `docs/05_training_strategy.md`:
 │   ├── zhou_cross_attention.yaml
 │   ├── yang_ccim.yaml
 │   ├── glamor_net.yaml
+│   ├── agcd_net.yaml
 │   └── cd_ica_net.yaml
 ├── scripts/
 │   ├── build_caers_manifest.py
@@ -93,12 +96,16 @@ See `docs/05_training_strategy.md`:
 │   │   ├── zhou_cross_attention/
 │   │   ├── yang_ccim/
 │   │   ├── glamor_net/
+│   │   ├── agcd_net/            # AGCD-Net (ICIAP 2025) reproduction
+│   │   │   ├── model.py         # Main AGCD-Net model
+│   │   │   ├── hybrid_convnext.py   # Hybrid ConvNeXt + STN + SE
+│   │   │   └── ag_cim.py          # Attention Guided Causal Intervention
 │   │   └── cd_ica_net/         # CD-ICA-Net (proposed)
-│           ├── model.py    # Main CD-ICA-Net model
-│           ├── ica_module.py        # Iterative Bidirectional Cross-Attention
-│           ├── ccim_module.py       # Integrated causal debiasing
-│           ├── fusion_module.py     # Hybrid Adaptive Fusion (AA + DF)
-│           └── confounder_builder.py # Offline K-Means++ confounder dict
+│   │       ├── model.py    # Main CD-ICA-Net model
+│   │       ├── ica_module.py        # Iterative Bidirectional Cross-Attention
+│   │       ├── ccim_module.py       # Integrated causal debiasing
+│   │       ├── fusion_module.py     # Hybrid Adaptive Fusion (AA + DF)
+│   │       └── confounder_builder.py # Offline K-Means++ confounder dict
 │   └── utils/
 │       ├── io_utils.py
 │       └── data_manifest.py
@@ -185,11 +192,16 @@ python -c "import torch; print('GPU available:', torch.cuda.is_available()); pri
 
 ⚠️ **Do NOT compare CD-ICA-Net with EmotiCon+CCIM (91.17%)** — unfair base model.
 
-Fair comparisons:
+Fair comparisons (reproduced in codebase):
 - CD-ICA-Net vs CAER-Net ✅
 - CD-ICA-Net vs GLAMOR-Net ✅
 - CD-ICA-Net vs CAHFW-Net ✅
 - CD-ICA-Net vs Yang-CCIM (ResNet-101 reproduced) ✅
+
+Recent competitors (2024–2025, reported only):
+- AGCD-Net (ICIAP 2025) — direct competitor combining attention + causal debiasing with ConvNeXt
+- DSCT (arXiv 2024) — DETR-style Transformer, decouple-then-fuse
+- EmoCommonSense (IJCNN 2025) — VLLM + common sense reasoning, SOTA on CAER-S
 
 See `docs/10_baseline_strategy.md` for full rationale and paper text templates.
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import Any
 
@@ -37,11 +38,13 @@ class CAERSTwoStreamDataset(Dataset):
         transform: Any = None,
         face_transform: Any = None,
         context_transform: Any = None,
+        synchronized_flip: bool = False,
     ) -> None:
         self.dataset_root = dataset_root
         self.split = split
         self.image_size = image_size
         self.face_size = face_size or image_size
+        self.synchronized_flip = synchronized_flip
 
         # Fallback to unified transform if per-stream transforms not provided
         if face_transform is not None and context_transform is not None:
@@ -53,7 +56,10 @@ class CAERSTwoStreamDataset(Dataset):
             self.context_transform = t
 
         rows = read_jsonl(manifest_path)
-        self.rows = [r for r in rows if str(r.get("split")) == split]
+        if isinstance(split, (list, tuple)):
+            self.rows = [r for r in rows if str(r.get("split")) in split]
+        else:
+            self.rows = [r for r in rows if str(r.get("split")) == split]
         if len(self.rows) == 0:
             raise ValueError(f"No rows found for split={split} in manifest={manifest_path}")
 
@@ -87,6 +93,14 @@ class CAERSTwoStreamDataset(Dataset):
 
         image = Image.open(image_path).convert("RGB")
         face_bbox = row.get("face_bbox")
+
+        # Synchronized random horizontal flip on original image
+        if self.synchronized_flip and random.random() < 0.5:
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
+            if face_bbox and isinstance(face_bbox, (list, tuple)) and len(face_bbox) == 4:
+                w, h = image.size
+                x1, y1, x2, y2 = [int(v) for v in face_bbox]
+                face_bbox = [w - x2, y1, w - x1, y2]
 
         # Face branch: cropped face (paper uses 96x96 for CAER-Net/GLAMOR)
         face_crop = self._crop_face(image, face_bbox)

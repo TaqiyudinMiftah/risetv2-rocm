@@ -19,6 +19,8 @@ Yang et al. (CVPR 2023) reports **91.17%** on CAER-S, but this is for **EmotiCon
 
 ## Recommended Baseline Table
 
+### CNN-Based Baselines (Reproduced)
+
 | Model | CAER-S (Paper) | CAER-S (Ours) | Status |
 |-------|---------------|--------------|--------|
 | CAER-Net-S (Lee et al. 2019) | 73.51% | ~73% | Reproduced ✅ |
@@ -26,6 +28,14 @@ Yang et al. (CVPR 2023) reports **91.17%** on CAER-S, but this is for **EmotiCon
 | CAHFW-Net (Zhou et al. 2023) | 83.76% | ~82-83% | Reproduced ✅ |
 | Yang CCIM (ResNet-101 base) | Not reported | ~82-86% | Our reproduction* |
 | **CD-ICA-Net (Ours)** | - | **TBD** | **Proposed** |
+
+### Recent Competitors (2024-2025)
+
+| Model | CAER-S (Paper) | Status |
+|-------|---------------|--------|
+| DSCT (Li et al. 2024) | +3.39% vs two-stage | Reported only |
+| EmoCommonSense (Xenos et al. IJCNN 2025) | SOTA (exact TBD) | Reported only |
+| AGCD-Net (Devi et al. ICIAP 2025) | SOTA (exact TBD) | **Direct competitor** |
 
 \* *Reproduced using ResNet-101 base model. Paper's 91.17% uses EmotiCon base which we do not reproduce.*
 
