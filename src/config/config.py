@@ -19,6 +19,9 @@ class DatasetConfig:
     create_val_split: bool
     val_ratio: float
     image_size: int
+    # Optional official CAER-S detector files from the PyTorch reproduction repo.
+    # Format per line: relative_image_path,label,x1,y1,x2,y2
+    detection_files: dict[str, Path] = field(default_factory=dict)
 
 
 @dataclass
@@ -155,6 +158,24 @@ def _as_tuple(value: Any) -> tuple[str, ...]:
     return ext
 
 
+def _build_detection_files(raw: dict[str, Any]) -> dict[str, Path]:
+    detection_raw = raw.get("detection_files", {}) or raw.get("official_bbox_files", {})
+    if detection_raw in (None, ""):
+        return {}
+    if not isinstance(detection_raw, dict):
+        raise ValueError("dataset.detection_files must be a mapping with train/val/test keys")
+
+    detection_files: dict[str, Path] = {}
+    for split_name, value in detection_raw.items():
+        if value in (None, ""):
+            continue
+        split_key = str(split_name).lower()
+        if split_key not in {"train", "val", "test"}:
+            raise ValueError(f"Unsupported detection_files split: {split_name}")
+        detection_files[split_key] = Path(str(value)).expanduser()
+    return detection_files
+
+
 def _build_dataset_cfg(raw: dict[str, Any]) -> DatasetConfig:
     return DatasetConfig(
         dataset_root=Path(str(raw.get("dataset_root", ""))).expanduser(),
@@ -162,6 +183,7 @@ def _build_dataset_cfg(raw: dict[str, Any]) -> DatasetConfig:
         create_val_split=bool(raw.get("create_val_split", True)),
         val_ratio=float(raw.get("val_ratio", 0.1)),
         image_size=int(raw.get("image_size", 224)),
+        detection_files=_build_detection_files(raw),
     )
 
 
