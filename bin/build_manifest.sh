@@ -14,6 +14,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CONFIG="${PROJECT_ROOT}/configs/caernet.yaml"
+DETECTION_ARGS=()
 
 # Parse optional arguments
 while [[ $# -gt 0 ]]; do
@@ -22,12 +23,27 @@ while [[ $# -gt 0 ]]; do
             CONFIG="$2"
             shift 2
             ;;
+        --train-detections)
+            DETECTION_ARGS+=("--train-detections" "$2")
+            shift 2
+            ;;
+        --val-detections)
+            DETECTION_ARGS+=("--val-detections" "$2")
+            shift 2
+            ;;
+        --test-detections)
+            DETECTION_ARGS+=("--test-detections" "$2")
+            shift 2
+            ;;
         --help|-h)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --config PATH      Custom config file path (default: configs/caernet.yaml)"
-            echo "  --help, -h         Show this help"
+            echo "  --config PATH              Custom config file path (default: configs/caernet.yaml)"
+            echo "  --train-detections PATH    Official train bbox file: rel_path,label,x1,y1,x2,y2"
+            echo "  --val-detections PATH      Official val bbox file. Overrides random val split."
+            echo "  --test-detections PATH     Official test bbox file: rel_path,label,x1,y1,x2,y2"
+            echo "  --help, -h                 Show this help"
             exit 0
             ;;
         *)
@@ -50,7 +66,7 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 cd "$PROJECT_ROOT"
-"$PYTHON" scripts/build_caers_manifest.py --config "$CONFIG"
+"$PYTHON" scripts/build_caers_manifest.py --config "$CONFIG" "${DETECTION_ARGS[@]}"
 
 echo ""
 echo "Manifest build complete!"

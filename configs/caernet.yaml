@@ -7,6 +7,13 @@ dataset:
   create_val_split: true
   val_ratio: 0.1
   image_size: 224             # paper: both face & context are 224x224
+  # Optional official CAER-S detector files from ndkhanh360/CAER.
+  # When provided, manifest rows will include face_bbox=[x1,y1,x2,y2]
+  # and val will use the official val file instead of random holdout.
+  # detection_files:
+  #   train: data/caer_official/train.txt
+  #   val: data/caer_official/val.txt
+  #   test: data/caer_official/test.txt
 
 model:
   backbone: resnet18
